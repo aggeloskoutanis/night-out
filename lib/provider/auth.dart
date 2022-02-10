@@ -45,9 +45,9 @@ class Auth with ChangeNotifier {
         throw HttpException(responseData['error']['message']);
       }
 
-      print(json.decode(response.body));
+      // print(json.decode(response.body));
     } catch (error) {
-      throw error;
+      rethrow;
     }
   }
 
@@ -67,14 +67,14 @@ class Auth with ChangeNotifier {
         throw HttpException(responseData['error']['message']);
       }
 
-      print(json.decode(response.body));
+      // print(json.decode(response.body));
       _token = responseData['idToken'];
       _userId = responseData['localId'];
       _expiryDate = DateTime.now()
           .add(Duration(seconds: int.parse(responseData['expiresIn'])));
       notifyListeners();
     } catch (error) {
-      throw error;
+      rethrow;
     }
   }
 }

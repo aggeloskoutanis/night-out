@@ -16,11 +16,13 @@ void main() async {
   await Firebase.initializeApp(
       name: 'night-out', options: DefaultFirebaseConfig.platformOptions);
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   final int number = 1;
+
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +43,8 @@ class MyApp extends StatelessWidget {
             title: 'Counter App Example',
             theme: ThemeData(
               primaryColor: Colors.red.shade800,
-              accentColor: Colors.red.shade600,
+              colorScheme: ColorScheme.fromSwatch()
+                  .copyWith(secondary: Colors.red.shade600),
             ),
             debugShowCheckedModeBanner: false,
             // home: auth.isAuth ? EventsOverviewScreen() : AuthScreen(),
@@ -49,13 +52,14 @@ class MyApp extends StatelessWidget {
                 stream: FirebaseAuth.instance.authStateChanges(),
                 builder: (ctx, userSnapshot) {
                   if (userSnapshot.hasData) {
-                    return EventsOverviewScreen();
+                    return const EventsOverviewScreen();
                   }
-                  return AuthScreen();
+                  return const AuthScreen();
                 }),
             routes: {
-              AuthScreen.routeName: (ctx) => AuthScreen(),
-              EventCreationScreen.routeName: (ctx) => EventCreationScreen()
+              AuthScreen.routeName: (ctx) => const AuthScreen(),
+              EventCreationScreen.routeName: (ctx) =>
+                  const EventCreationScreen()
             },
           ),
         ));

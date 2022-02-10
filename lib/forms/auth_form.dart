@@ -4,11 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../widgets/profile_pic_picker.dart';
 
-enum AuthMode { Signup, Login }
+enum AuthMode { signup, login }
 
 class AuthForm extends StatefulWidget {
   const AuthForm({Key? key}) : super(key: key);
@@ -25,13 +24,13 @@ class _AuthFormState extends State<AuthForm> {
 
   final _formKey = GlobalKey<FormState>();
   var _isLoading = false;
-  AuthMode _authMode = AuthMode.Login;
+  AuthMode _authMode = AuthMode.login;
   String? email;
   String? username;
   String? password;
   String? imageURL;
 
-  var _userImageFile;
+  File? _userImageFile;
   void _pickedImage(File image) {
     _userImageFile = image;
   }
@@ -39,8 +38,8 @@ class _AuthFormState extends State<AuthForm> {
   final _passwordController = TextEditingController();
 
   Future<String?> _uploadProfilePicToFb(
-      UserCredential auth_result, File file) async {
-    String uid = auth_result.user?.uid ?? username!;
+      UserCredential authResult, File file) async {
+    String uid = authResult.user?.uid ?? username!;
 
     Reference ref = _fbstorage.ref().child("images").child(uid + '.jpg');
     await ref.putFile(file);
@@ -49,13 +48,13 @@ class _AuthFormState extends State<AuthForm> {
   }
 
   void _switchMode() {
-    if (AuthMode.Login == _authMode) {
+    if (AuthMode.login == _authMode) {
       setState(() {
-        _authMode = AuthMode.Signup;
+        _authMode = AuthMode.signup;
       });
     } else {
       setState(() {
-        _authMode = AuthMode.Login;
+        _authMode = AuthMode.login;
       });
     }
   }
@@ -77,7 +76,7 @@ class _AuthFormState extends State<AuthForm> {
   void _submit() async {
     // Validate returns true if the form is valid, or false otherwise.
 
-    if (_userImageFile == null && AuthMode != AuthMode.Login) {
+    if (_userImageFile == null && _authMode != AuthMode.login) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please provide a profile picture.')),
       );
@@ -93,7 +92,7 @@ class _AuthFormState extends State<AuthForm> {
       });
 
       try {
-        if (_authMode == AuthMode.Login) {
+        if (_authMode == AuthMode.login) {
           // log user in
           await _auth.signInWithEmailAndPassword(
               email: email!, password: password!);
@@ -104,7 +103,7 @@ class _AuthFormState extends State<AuthForm> {
               await _auth.createUserWithEmailAndPassword(
                   email: email!, password: password!);
 
-          await _uploadProfilePicToFb(_authResult, _userImageFile)
+          await _uploadProfilePicToFb(_authResult, _userImageFile!)
               .then((imgURL) {
             if (imgURL == null) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -144,16 +143,15 @@ class _AuthFormState extends State<AuthForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Form(
+    return Form(
       key: _formKey,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: <Widget>[
             // Add TextFormFields and ElevatedButton here.
-            if (_authMode == AuthMode.Login)
-              Container(
+            if (_authMode == AuthMode.login)
+              SizedBox(
                 height: MediaQuery.of(context).size.height * 0.25,
                 width: MediaQuery.of(context).size.width * .5,
                 child: Center(child: Image.asset('assets/drink.png')
@@ -165,39 +163,39 @@ class _AuthFormState extends State<AuthForm> {
                     // ),
                     ),
               ),
-            if (_authMode == AuthMode.Signup) ProfilePicPicker(_pickedImage),
+            if (_authMode == AuthMode.signup) ProfilePicPicker(_pickedImage),
 
-            SizedBox(
+            const SizedBox(
               height: 40,
             ),
             TextFormField(
               onSaved: (value) {
                 username = value!;
               },
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
               decoration: InputDecoration(
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.person,
                     color: Colors.white70,
                   ),
                   hintText: "Enter username",
-                  hintStyle: TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: Colors.white70),
                   // errorText: "Invalid input",
-                  label: Text(
+                  label: const Text(
                     "Username",
                     style: TextStyle(color: Colors.white70),
                   ),
                   enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Colors.blueGrey,
                       ),
                       borderRadius: BorderRadius.circular(8.0)),
                   border: OutlineInputBorder(
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Colors.blueGrey,
                       ),
                       borderRadius: BorderRadius.circular(8.0)),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.teal, width: 2))),
               // The validator receives the text that the user has entered.
               validator: (value) {
@@ -207,38 +205,38 @@ class _AuthFormState extends State<AuthForm> {
                 return null;
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             TextFormField(
               onSaved: (value) {
                 email = value!;
               },
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.email,
                     color: Colors.white70,
                   ),
                   hintText: "Enter e-mail",
-                  hintStyle: TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: Colors.white70),
                   // errorText: "Invalid input",
-                  label: Text(
+                  label: const Text(
                     "E-mail",
                     style: TextStyle(color: Colors.white70),
                   ),
                   enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Colors.blueGrey,
                       ),
                       borderRadius: BorderRadius.circular(8.0)),
                   border: OutlineInputBorder(
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Colors.blueGrey,
                       ),
                       borderRadius: BorderRadius.circular(8.0)),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.teal, width: 2))),
               // The validator receives the text that the user has entered.
               validator: (value) {
@@ -248,35 +246,36 @@ class _AuthFormState extends State<AuthForm> {
                 return null;
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             TextFormField(
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
               obscureText: true,
               controller: _passwordController,
               decoration: InputDecoration(
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.lock_outline_rounded,
                     color: Colors.white70,
                   ),
                   hintText: "Enter password",
-                  hintStyle: TextStyle(color: Colors.white70),
+                  hintStyle: const TextStyle(color: Colors.white70),
                   // errorText: "Invalid password",
-                  label: Text(
+                  label: const Text(
                     "Password",
                     style: TextStyle(color: Colors.white70),
                   ),
                   enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Colors.blueGrey,
                       ),
                       borderRadius: BorderRadius.circular(8.0)),
                   focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.teal, width: 2),
+                      borderSide:
+                          const BorderSide(color: Colors.teal, width: 2),
                       borderRadius: BorderRadius.circular(8.0)),
                   border: OutlineInputBorder(
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Colors.blueGrey,
                       ),
                       borderRadius: BorderRadius.circular(8.0))),
@@ -291,51 +290,53 @@ class _AuthFormState extends State<AuthForm> {
                 password = value!;
               },
             ),
-            if (_authMode == AuthMode.Signup)
-              SizedBox(
+            if (_authMode == AuthMode.signup)
+              const SizedBox(
                 height: 10,
               ),
-            if (_authMode == AuthMode.Signup)
+            if (_authMode == AuthMode.signup)
               TextFormField(
-                style: TextStyle(color: Colors.white70),
+                style: const TextStyle(color: Colors.white70),
                 obscureText: true,
                 decoration: InputDecoration(
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.lock_outline_rounded,
                       color: Colors.white70,
                     ),
                     hintText: "Confirm password",
-                    hintStyle: TextStyle(color: Colors.white70),
-                    label: Text(
+                    hintStyle: const TextStyle(color: Colors.white70),
+                    label: const Text(
                       "Confirm Password",
                       style: TextStyle(color: Colors.white70),
                     ),
                     focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.teal, width: 2),
+                        borderSide:
+                            const BorderSide(color: Colors.teal, width: 2),
                         borderRadius: BorderRadius.circular(8.0)),
                     enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Colors.blueGrey,
                         ),
                         borderRadius: BorderRadius.circular(8.0)),
                     border: OutlineInputBorder(
-                        borderSide: BorderSide(
+                        borderSide: const BorderSide(
                           color: Colors.blueGrey,
                         ),
                         borderRadius: BorderRadius.circular(8.0))),
                 // The validator receives the text that the user has entered.
-                validator: _authMode == AuthMode.Signup
+                validator: _authMode == AuthMode.signup
                     ? (value) {
                         if (value != _passwordController.text) {
                           return 'Passwords do not match!';
                         }
+                        return null;
                       }
                     : null,
                 onSaved: (value) {
                   password = value!;
                 },
               ),
-            SizedBox(
+            const SizedBox(
               height: 40,
             ),
 
@@ -344,30 +345,30 @@ class _AuthFormState extends State<AuthForm> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   if (_isLoading)
-                    CircularProgressIndicator()
+                    const CircularProgressIndicator()
                   else
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           primary: Colors.blueGrey,
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 50, vertical: 10)),
                       onPressed: _submit,
                       child: Text(
-                          _authMode == AuthMode.Login ? 'Login' : 'Sign up'),
+                          _authMode == AuthMode.login ? 'Login' : 'Sign up'),
                     ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         primary: Colors.blueGrey,
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 50, vertical: 10)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 10)),
                     onPressed: _switchMode,
                     child: Text(
-                        _authMode == AuthMode.Login ? 'Sign up' : 'Go back'),
+                        _authMode == AuthMode.login ? 'Sign up' : 'Go back'),
                   ),
                 ]),
           ],
         ),
       ),
-    ));
+    );
   }
 }

@@ -17,16 +17,16 @@ class EventCreationForm extends StatefulWidget {
 
 class _EventCreationFormState extends State<EventCreationForm> {
   final _formKey = GlobalKey<FormState>();
-  String? event_name;
-  List<UserDetails>? user_emails = [];
-  List<UserDetails>? people_to_invite = [];
+  String? eventName;
+  List<UserDetails>? userEmails = [];
+  List<UserDetails>? peopleToInvite = [];
   double lat = 51.5;
   double lon = -0.09;
 
   final peopleToInviteStream = StreamController<List<UserDetails>>();
-  int stream_counter = -1;
+  int streamCounter = -1;
 
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void dispose() {
@@ -42,24 +42,24 @@ class _EventCreationFormState extends State<EventCreationForm> {
     return FutureBuilder<QuerySnapshot>(
         future: FirebaseFirestore.instance.collection('users').get(),
         builder: (ctx, dataSnapshot) {
-          if (ConnectionState.waiting == dataSnapshot.connectionState)
-            return Center(
+          if (ConnectionState.waiting == dataSnapshot.connectionState) {
+            return const Center(
               child: CircularProgressIndicator(
                 color: Colors.amber,
               ),
             );
-          else if (dataSnapshot.connectionState == ConnectionState.done) {
-            final fetched_data = dataSnapshot.data?.docs;
+          } else if (dataSnapshot.connectionState == ConnectionState.done) {
+            final fetchedData = dataSnapshot.data?.docs;
 
-            fetched_data?.forEach((element) {
-              user_emails?.add(UserDetails(
+            fetchedData?.forEach((element) {
+              userEmails?.add(UserDetails(
                   id: element.id,
                   username: element['user_name'] as String,
                   email: element['email'] as String,
-                  profile_pic: element['prof_pic'] as String));
+                  profilePic: element['prof_pic'] as String));
             });
 
-            return Container(
+            return SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: Form(
                   key: _formKey,
@@ -70,33 +70,33 @@ class _EventCreationFormState extends State<EventCreationForm> {
                       children: [
                         TextFormField(
                           onSaved: (value) {
-                            event_name = value!;
+                            eventName = value!;
                           },
-                          style: TextStyle(color: Colors.white70),
+                          style: const TextStyle(color: Colors.white70),
                           keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
-                              prefixIcon: Icon(
+                              prefixIcon: const Icon(
                                 Icons.drive_file_rename_outline,
                                 color: Colors.white70,
                               ),
                               hintText: "Enter an event name",
-                              hintStyle: TextStyle(color: Colors.white70),
+                              hintStyle: const TextStyle(color: Colors.white70),
                               // errorText: "Invalid input",
-                              label: Text(
+                              label: const Text(
                                 "Event name",
                                 style: TextStyle(color: Colors.white70),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Colors.blueGrey,
                                   ),
                                   borderRadius: BorderRadius.circular(8.0)),
                               border: OutlineInputBorder(
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Colors.blueGrey,
                                   ),
                                   borderRadius: BorderRadius.circular(8.0)),
-                              focusedBorder: OutlineInputBorder(
+                              focusedBorder: const OutlineInputBorder(
                                   borderSide: BorderSide(
                                       color: Colors.teal, width: 2))),
                           // The validator receives the text that the user has entered.
@@ -107,61 +107,59 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             return null;
                           },
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         TextField(
-                          style: TextStyle(color: Colors.white70),
+                          style: const TextStyle(color: Colors.white70),
                           decoration: InputDecoration(
-                              prefixIcon: Icon(
+                              prefixIcon: const Icon(
                                 Icons.supervised_user_circle_sharp,
                                 color: Colors.white70,
                               ),
                               hintText: "Find users to invite",
-                              hintStyle: TextStyle(color: Colors.white70),
+                              hintStyle: const TextStyle(color: Colors.white70),
                               // errorText: "Invalid input",
-                              label: Text(
+                              label: const Text(
                                 "Search user",
                                 style: TextStyle(color: Colors.white70),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Colors.blueGrey,
                                   ),
                                   borderRadius: BorderRadius.circular(8.0)),
                               border: OutlineInputBorder(
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: Colors.blueGrey,
                                   ),
                                   borderRadius: BorderRadius.circular(8.0)),
-                              focusedBorder: OutlineInputBorder(
+                              focusedBorder: const OutlineInputBorder(
                                   borderSide: BorderSide(
                                       color: Colors.teal, width: 2))),
                           // The validator receives
                           onChanged: (selectedValue) {
-                            if (people_to_invite!.length <
-                                (user_emails as List).length) {
-                              UserDetails? found_user =
-                                  user_emails?.firstWhereOrNull((element) =>
+                            if (peopleToInvite!.length <
+                                (userEmails as List).length) {
+                              UserDetails? foundUser =
+                                  userEmails?.firstWhereOrNull((element) =>
                                       element.username == selectedValue);
 
-                              UserDetails? already_in_list = people_to_invite
-                                  ?.firstWhereOrNull((element) =>
-                                      found_user?.id == element.id);
+                              UserDetails? alreadyInList =
+                                  peopleToInvite?.firstWhereOrNull(
+                                      (element) => foundUser?.id == element.id);
 
-                              if (found_user != null &&
-                                  already_in_list == null) {
-                                people_to_invite?.add(found_user);
+                              if (foundUser != null && alreadyInList == null) {
+                                peopleToInvite?.add(foundUser);
 
-                                peopleToInviteStream.sink
-                                    .add(people_to_invite!);
+                                peopleToInviteStream.sink.add(peopleToInvite!);
 
-                                print('found!');
+                                // print('found!');
                               }
                             }
                           },
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         StreamBuilder(
@@ -169,15 +167,15 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             builder: (ctx, snapshot) {
                               if (snapshot.connectionState ==
                                       ConnectionState.waiting ||
-                                  snapshot.data == null)
-                                return Center(
+                                  snapshot.data == null) {
+                                return const Center(
                                   child: CircularProgressIndicator(),
                                 );
-                              else if (snapshot.data != null) {
+                              } else if (snapshot.data != null) {
                                 List<UserDetails> selectedUsers =
                                     snapshot.data as List<UserDetails>;
                                 return Container(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
                                       border:
                                           Border.all(color: Colors.blueGrey),
@@ -188,14 +186,14 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                       shrinkWrap: true,
                                       itemBuilder: (ctx, index) {
                                         return UserItem(
-                                            user_details: selectedUsers[index],
-                                            user_list: people_to_invite,
-                                            stream_sink:
+                                            userDetails: selectedUsers[index],
+                                            userList: peopleToInvite!,
+                                            streamSink:
                                                 peopleToInviteStream.sink);
                                       }),
                                 );
                               } else {
-                                return Text('Nothing to Show');
+                                return const Text('Nothing to Show');
                               }
                             }),
 
@@ -303,7 +301,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                   ),
                 ));
           } else {
-            return Text('Loading');
+            return const Text('Loading');
           }
         });
   }

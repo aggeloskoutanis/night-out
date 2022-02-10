@@ -46,7 +46,7 @@ class _ProfilePicPickerState extends State<ProfilePicPicker> {
                     image: FileImage(_pickedImage!),
                   ).image
                 : null),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         ElevatedButton.icon(
@@ -56,17 +56,17 @@ class _ProfilePicPickerState extends State<ProfilePicPicker> {
                 shape: MaterialStateProperty.all(
                   RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5.0),
-                      side: BorderSide(
+                      side: const BorderSide(
                           width: 2.0,
                           color: Colors.blueGrey,
                           style: BorderStyle.solid)),
                 )),
             onPressed: _pickImage,
-            icon: Icon(
+            icon: const Icon(
               Icons.image_search_outlined,
               color: Colors.teal,
             ),
-            label: Text(
+            label: const Text(
               'Upload image',
               style: TextStyle(color: Colors.blueGrey),
               textAlign: TextAlign.left,

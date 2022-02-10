@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import 'icon_text.dart';
@@ -30,7 +28,7 @@ class EventCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4.0),
             ),
             elevation: 5,
-            margin: EdgeInsets.all(0),
+            margin: const EdgeInsets.all(0),
           ),
         )
         .toList();
@@ -58,9 +56,9 @@ class EventCard extends StatelessWidget {
                 color: Colors.grey,
                 height: 200 * 0.15,
                 child: Row(
-                  children: [
+                  children: const [
                     IconWithText(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.person_outline,
                           size: 20,
                         ),
@@ -68,18 +66,18 @@ class EventCard extends StatelessWidget {
                           "2",
                           style: TextStyle(fontSize: 12),
                         )),
-                    const Spacer(),
+                    Spacer(),
                     IconWithText(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.date_range,
                         size: 20,
                       ),
                       textName:
                           Text("22-02-2022", style: TextStyle(fontSize: 12)),
                     ),
-                    const Spacer(),
+                    Spacer(),
                     IconWithText(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.location_pin,
                         size: 20,
                       ),

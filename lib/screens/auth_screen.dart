@@ -14,20 +14,20 @@ class AuthScreen extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                   colors: [
-                    Color.fromRGBO(1, 1, 1, 1).withOpacity(1),
-                    Color.fromRGBO(1, 25, 38, 1).withOpacity(0.9),
+                    const Color.fromRGBO(1, 1, 1, 1).withOpacity(1),
+                    const Color.fromRGBO(1, 25, 38, 1).withOpacity(0.9),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  stops: [0, 1]),
+                  stops: const [0, 1]),
             ),
           ),
           SingleChildScrollView(
-            child: Container(
+            child: SizedBox(
               height: deviceSize.height,
               width: deviceSize.width,
               child: Column(
-                children: [
+                children: const [
                   SizedBox(
                     height: 100,
                   ),

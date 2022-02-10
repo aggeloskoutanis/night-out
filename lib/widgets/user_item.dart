@@ -6,14 +6,14 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import '../provider/models/user.dart';
 
 class UserItem extends StatelessWidget {
-  final UserDetails user_details;
-  final user_list;
-  final StreamSink<List<UserDetails>> stream_sink;
+  final UserDetails userDetails;
+  final List<UserDetails> userList;
+  final StreamSink<List<UserDetails>> streamSink;
   const UserItem(
       {Key? key,
-      required this.user_details,
-      required this.user_list,
-      required this.stream_sink})
+      required this.userDetails,
+      required this.userList,
+      required this.streamSink})
       : super(key: key);
 
   @override
@@ -28,9 +28,9 @@ class UserItem extends StatelessWidget {
           dismissible: DismissiblePane(
               key: UniqueKey(),
               onDismissed: () {
-                user_list.remove(user_details);
+                userList.remove(userDetails);
 
-                stream_sink.add(user_list);
+                streamSink.add(userList);
               }),
 
           // All actions are defined in the children parameter.
@@ -38,7 +38,7 @@ class UserItem extends StatelessWidget {
             // A SlidableAction can have an icon and/or a label.
             SlidableAction(
               onPressed: doNothing,
-              backgroundColor: Color(0xFFFE4A49),
+              backgroundColor: const Color(0xFFFE4A49),
               foregroundColor: Colors.white,
               icon: Icons.delete,
               label: 'Delete',
@@ -46,26 +46,25 @@ class UserItem extends StatelessWidget {
           ],
         ),
         child: UserTile(
-            username: user_details.username,
-            picture: user_details.profile_pic));
+            username: userDetails.username, picture: userDetails.profilePic));
   }
 
   void doNothing(BuildContext context) {}
 }
 
 class UserTile extends StatelessWidget {
-  final username;
-  final picture;
+  final String? username;
+  final String? picture;
 
   const UserTile({Key? key, this.username, this.picture}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: CircleAvatar(
+      leading: const CircleAvatar(
         child: null,
       ),
-      title: Text(username),
+      title: Text(username!),
     );
   }
 }
