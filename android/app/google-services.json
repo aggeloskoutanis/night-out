@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "690138575353",
+    "firebase_url": "https://night-out-11544-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "night-out-11544",
+    "storage_bucket": "night-out-11544.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690138575353:android:6d0697db7e512dbc844d28",
+        "android_client_info": {
+          "package_name": "com.aggelos.nightout"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "690138575353-5m5oiq5ej2820lp5fm9og52gh20cf6cg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXlvfDEqSoW07DenmU2NHpUg_pgPwNgwI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "690138575353-5m5oiq5ej2820lp5fm9og52gh20cf6cg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
