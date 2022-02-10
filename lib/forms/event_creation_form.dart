@@ -30,6 +30,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
 
   @override
   void dispose() {
+    // hi
     _controller.dispose();
     peopleToInviteStream.close();
     super.dispose();
