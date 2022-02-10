@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 
 import './../provider/models/user.dart';
 import '../widgets/user_item.dart';
+import '../widgets/user_list.dart';
 
 class EventCreationForm extends StatefulWidget {
   const EventCreationForm({Key? key}) : super(key: key);
@@ -109,54 +109,26 @@ class _EventCreationFormState extends State<EventCreationForm> {
                         const SizedBox(
                           height: 10,
                         ),
-                        TextField(
-                          style: const TextStyle(color: Colors.white70),
-                          decoration: InputDecoration(
-                              prefixIcon: const Icon(
-                                Icons.supervised_user_circle_sharp,
-                                color: Colors.white70,
-                              ),
-                              hintText: "Find users to invite",
-                              hintStyle: const TextStyle(color: Colors.white70),
-                              // errorText: "Invalid input",
-                              label: const Text(
-                                "Search user",
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                    color: Colors.blueGrey,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8.0)),
-                              border: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                    color: Colors.blueGrey,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8.0)),
-                              focusedBorder: const OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.teal, width: 2))),
-                          // The validator receives
-                          onChanged: (selectedValue) {
-                            if (peopleToInvite!.length <
-                                (userEmails as List).length) {
-                              UserDetails? foundUser =
-                                  userEmails?.firstWhereOrNull((element) =>
-                                      element.username == selectedValue);
-
-                              UserDetails? alreadyInList =
-                                  peopleToInvite?.firstWhereOrNull(
-                                      (element) => foundUser?.id == element.id);
-
-                              if (foundUser != null && alreadyInList == null) {
-                                peopleToInvite?.add(foundUser);
-
-                                peopleToInviteStream.sink.add(peopleToInvite!);
-
-                                // print('found!');
-                              }
-                            }
-                          },
+                        Row(
+                          children: [
+                            GestureDetector(
+                                child: const Icon(Icons.search_off),
+                                onTap: () {
+                                  showModalBottomSheet(
+                                      backgroundColor: Colors.blueAccent,
+                                      isDismissible: true,
+                                      enableDrag: true,
+                                      context: context,
+                                      elevation: 10,
+                                      builder: (ctx) {
+                                        return UserList();
+                                      });
+                                }),
+                            GestureDetector(
+                              child: const Icon(Icons.list_alt_outlined),
+                              onTap: () {},
+                            )
+                          ],
                         ),
                         const SizedBox(
                           height: 10,

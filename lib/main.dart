@@ -6,15 +6,13 @@ import 'package:flutter_firebase_login/screens/event_creation_screen.dart';
 import 'package:flutter_firebase_login/screens/events_overview.dart';
 import 'package:provider/provider.dart';
 
-import './firebase_options.dart';
 import './provider/events.dart';
 import 'provider/auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-      name: 'night-out', options: DefaultFirebaseConfig.platformOptions);
+  await Firebase.initializeApp();
 
   runApp(const MyApp());
 }

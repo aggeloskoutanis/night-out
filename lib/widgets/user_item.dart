@@ -61,8 +61,15 @@ class UserTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const CircleAvatar(
-        child: null,
+      leading: CircleAvatar(
+        child: picture == null
+            ? Image.asset(
+                'assets/pic_placeholder.png',
+                fit: BoxFit.contain,
+              )
+            : null,
+        backgroundImage:
+            (picture != null) ? Image.network(picture!).image : null,
       ),
       title: Text(username!),
     );
