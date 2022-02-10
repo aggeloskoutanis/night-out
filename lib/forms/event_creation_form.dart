@@ -30,8 +30,6 @@ class _EventCreationFormState extends State<EventCreationForm> {
 
   @override
   void dispose() {
-    // Clean up the controller when the widget is removed from the
-    // widget tree.
     _controller.dispose();
     peopleToInviteStream.close();
     super.dispose();
