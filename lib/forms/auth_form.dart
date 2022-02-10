@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -17,19 +19,35 @@ class AuthForm extends StatefulWidget {
 
 class _AuthFormState extends State<AuthForm> {
   final _auth = FirebaseAuth.instance;
+  final _fbstorage = FirebaseStorage.instance;
+
   get user => _auth.currentUser;
 
   final _formKey = GlobalKey<FormState>();
   var _isLoading = false;
   AuthMode _authMode = AuthMode.Login;
   String? email;
+  String? username;
   String? password;
+  String? imageURL;
+
   var _userImageFile;
   void _pickedImage(File image) {
     _userImageFile = image;
   }
 
   final _passwordController = TextEditingController();
+
+  Future<String?> _uploadProfilePicToFb(
+      UserCredential auth_result, File file) async {
+    String uid = auth_result.user?.uid ?? username!;
+
+    Reference ref = _fbstorage.ref().child("images").child(uid + '.jpg');
+    await ref.putFile(file);
+
+    return ref.getDownloadURL();
+  }
+
   void _switchMode() {
     if (AuthMode.Login == _authMode) {
       setState(() {
@@ -42,19 +60,19 @@ class _AuthFormState extends State<AuthForm> {
     }
   }
 
-  void _showErrorDialog(String message) {
-    showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-              title: Text('An error has occurred!'),
-              content: Text(message),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: Text('Okay!'))
-              ],
-            ));
-  }
+  // void _showErrorDialog(String message) {
+  //   showDialog(
+  //       context: context,
+  //       builder: (ctx) => AlertDialog(
+  //             title: Text('An error has occurred!'),
+  //             content: Text(message),
+  //             actions: [
+  //               TextButton(
+  //                   onPressed: () => Navigator.of(ctx).pop(),
+  //                   child: Text('Okay!'))
+  //             ],
+  //           ));
+  // }
 
   void _submit() async {
     // Validate returns true if the form is valid, or false otherwise.
@@ -63,6 +81,8 @@ class _AuthFormState extends State<AuthForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please provide a profile picture.')),
       );
+
+      return;
     }
 
     if (_formKey.currentState!.validate()) {
@@ -73,27 +93,47 @@ class _AuthFormState extends State<AuthForm> {
       });
 
       try {
-        UserCredential authResult;
         if (_authMode == AuthMode.Login) {
           // log user in
-          authResult = await _auth.signInWithEmailAndPassword(
+          await _auth.signInWithEmailAndPassword(
               email: email!, password: password!);
         } else {
           // Sign user up
 
-          authResult = await _auth.createUserWithEmailAndPassword(
-              email: email!, password: password!);
+          final UserCredential _authResult =
+              await _auth.createUserWithEmailAndPassword(
+                  email: email!, password: password!);
+
+          await _uploadProfilePicToFb(_authResult, _userImageFile)
+              .then((imgURL) {
+            if (imgURL == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Failed to upload image.Please try again.')),
+              );
+            } else {
+              imageURL = imgURL;
+            }
+          });
+
+          await FirebaseFirestore.instance.collection('users').add(
+              {'user_name': username, 'email': email, 'prof_pic': imageURL});
         }
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Processing Data')),
         );
 
         FocusScope.of(context).unfocus();
       } on FirebaseAuthException catch (e) {
-        _showErrorDialog(e.message!);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message!)),
+        );
       } catch (error) {
-        const errorMessage = 'Could not authenticate you. Please try later.';
-        _showErrorDialog(errorMessage);
+        // const errorMessage = 'Could not authenticate you. Please try later.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.toString())),
+        );
       }
     }
 
@@ -132,10 +172,9 @@ class _AuthFormState extends State<AuthForm> {
             ),
             TextFormField(
               onSaved: (value) {
-                email = value!;
+                username = value!;
               },
               style: TextStyle(color: Colors.white70),
-              keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                   prefixIcon: Icon(
                     Icons.person,

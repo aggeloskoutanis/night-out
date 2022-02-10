@@ -24,6 +24,8 @@ class _ProfilePicPickerState extends State<ProfilePicPicker> {
     setState(() {
       _pickedImage = File(pickedImageFile!.path);
     });
+
+    widget.pickedImage(File(pickedImageFile!.path));
   }
 
   @override
