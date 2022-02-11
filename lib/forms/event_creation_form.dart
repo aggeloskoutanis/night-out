@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 
 import './../provider/models/user.dart';
-import '../widgets/user_item.dart';
 import '../widgets/user_list.dart';
 
 class EventCreationForm extends StatefulWidget {
@@ -23,16 +22,13 @@ class _EventCreationFormState extends State<EventCreationForm> {
   double lat = 51.5;
   double lon = -0.09;
 
-  final peopleToInviteStream = StreamController<List<UserDetails>>();
   int streamCounter = -1;
 
   final TextEditingController _controller = TextEditingController();
 
   @override
   void dispose() {
-    // hi
     _controller.dispose();
-    peopleToInviteStream.close();
     super.dispose();
   }
 
@@ -115,14 +111,16 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                 child: const Icon(Icons.search_off),
                                 onTap: () {
                                   showModalBottomSheet(
-                                      backgroundColor: Colors.blueAccent,
+                                      backgroundColor: Colors.transparent,
                                       isDismissible: true,
                                       enableDrag: true,
                                       context: context,
                                       elevation: 10,
                                       builder: (ctx) {
-                                        return UserList();
-                                      });
+                                        return UserList(
+                                            userEmails: userEmails,
+                                            peopleToInvite: peopleToInvite);
+                                      }).whenComplete(() => {});
                                 }),
                             GestureDetector(
                               child: const Icon(Icons.list_alt_outlined),
@@ -130,43 +128,6 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             )
                           ],
                         ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        StreamBuilder(
-                            stream: peopleToInviteStream.stream,
-                            builder: (ctx, snapshot) {
-                              if (snapshot.connectionState ==
-                                      ConnectionState.waiting ||
-                                  snapshot.data == null) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              } else if (snapshot.data != null) {
-                                List<UserDetails> selectedUsers =
-                                    snapshot.data as List<UserDetails>;
-                                return Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  decoration: BoxDecoration(
-                                      border:
-                                          Border.all(color: Colors.blueGrey),
-                                      borderRadius: BorderRadius.circular(8.00),
-                                      color: Colors.white70),
-                                  child: ListView.builder(
-                                      itemCount: selectedUsers.length,
-                                      shrinkWrap: true,
-                                      itemBuilder: (ctx, index) {
-                                        return UserItem(
-                                            userDetails: selectedUsers[index],
-                                            userList: peopleToInvite!,
-                                            streamSink:
-                                                peopleToInviteStream.sink);
-                                      }),
-                                );
-                              } else {
-                                return const Text('Nothing to Show');
-                              }
-                            }),
 
                         // TextFormField(
                         //   controller: _controller,

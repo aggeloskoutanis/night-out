@@ -168,43 +168,44 @@ class _AuthFormState extends State<AuthForm> {
             const SizedBox(
               height: 40,
             ),
-            TextFormField(
-              onSaved: (value) {
-                username = value!;
-              },
-              style: const TextStyle(color: Colors.white70),
-              decoration: InputDecoration(
-                  prefixIcon: const Icon(
-                    Icons.person,
-                    color: Colors.white70,
-                  ),
-                  hintText: "Enter username",
-                  hintStyle: const TextStyle(color: Colors.white70),
-                  // errorText: "Invalid input",
-                  label: const Text(
-                    "Username",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.blueGrey,
-                      ),
-                      borderRadius: BorderRadius.circular(8.0)),
-                  border: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.blueGrey,
-                      ),
-                      borderRadius: BorderRadius.circular(8.0)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.teal, width: 2))),
-              // The validator receives the text that the user has entered.
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
-            ),
+            if (_authMode == AuthMode.signup)
+              TextFormField(
+                onSaved: (value) {
+                  username = value!;
+                },
+                style: const TextStyle(color: Colors.white70),
+                decoration: InputDecoration(
+                    prefixIcon: const Icon(
+                      Icons.person,
+                      color: Colors.white70,
+                    ),
+                    hintText: "Enter username",
+                    hintStyle: const TextStyle(color: Colors.white70),
+                    // errorText: "Invalid input",
+                    label: const Text(
+                      "Username",
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Colors.blueGrey,
+                        ),
+                        borderRadius: BorderRadius.circular(8.0)),
+                    border: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Colors.blueGrey,
+                        ),
+                        borderRadius: BorderRadius.circular(8.0)),
+                    focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.teal, width: 2))),
+                // The validator receives the text that the user has entered.
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter some text';
+                  }
+                  return null;
+                },
+              ),
             const SizedBox(
               height: 10,
             ),
