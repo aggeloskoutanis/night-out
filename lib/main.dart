@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_login/provider/models/invited_user.dart';
 import 'package:flutter_firebase_login/screens/auth_screen.dart';
 import 'package:flutter_firebase_login/screens/event_creation_screen.dart';
 import 'package:flutter_firebase_login/screens/events_overview.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
+          ChangeNotifierProvider(create: (_) => InvitedUser()),
           ChangeNotifierProvider.value(value: Auth()),
           ChangeNotifierProxyProvider<Auth, Events>(
               create: (context) => Events.defaultConstructor(),

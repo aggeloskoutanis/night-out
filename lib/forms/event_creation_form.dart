@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:provider/provider.dart';
 
 import './../provider/models/user.dart';
+import '../provider/models/invited_user.dart';
 import '../widgets/user_list.dart';
 
 class EventCreationForm extends StatefulWidget {
@@ -17,8 +19,9 @@ class EventCreationForm extends StatefulWidget {
 class _EventCreationFormState extends State<EventCreationForm> {
   final _formKey = GlobalKey<FormState>();
   String? eventName;
+
   List<UserDetails>? userEmails = [];
-  List<UserDetails>? peopleToInvite = [];
+
   double lat = 51.5;
   double lon = -0.09;
 
@@ -34,6 +37,8 @@ class _EventCreationFormState extends State<EventCreationForm> {
 
   @override
   Widget build(BuildContext context) {
+    final peopleToInvite = Provider.of<InvitedUser>(context);
+
     return FutureBuilder<QuerySnapshot>(
         future: FirebaseFirestore.instance.collection('users').get(),
         builder: (ctx, dataSnapshot) {
@@ -108,14 +113,17 @@ class _EventCreationFormState extends State<EventCreationForm> {
                         Row(
                           children: [
                             GestureDetector(
-                                child: const Icon(Icons.search_off),
+                                child: const Icon(
+                                  Icons.search_off,
+                                  color: Colors.white,
+                                ),
                                 onTap: () {
                                   showModalBottomSheet(
+                                      isScrollControlled: true,
                                       backgroundColor: Colors.transparent,
                                       isDismissible: true,
                                       enableDrag: true,
                                       context: context,
-                                      elevation: 10,
                                       builder: (ctx) {
                                         return UserList(
                                             userEmails: userEmails,
@@ -123,8 +131,64 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                       }).whenComplete(() => {});
                                 }),
                             GestureDetector(
-                              child: const Icon(Icons.list_alt_outlined),
-                              onTap: () {},
+                              child: const Icon(
+                                Icons.list_alt_outlined,
+                                color: Colors.white,
+                              ),
+                              onTap: () {
+                                showModalBottomSheet(
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    isDismissible: true,
+                                    enableDrag: true,
+                                    context: context,
+                                    builder: (ctx) {
+                                      return Consumer<InvitedUser>(
+                                        builder:
+                                            (context, invitedUsers, child) =>
+                                                SingleChildScrollView(
+                                          child: Container(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height -
+                                                (MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.25),
+                                            child: ListView.builder(
+                                              itemCount: invitedUsers
+                                                  .invitedUsers.length,
+                                              shrinkWrap: true,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                UserDetails user = invitedUsers
+                                                    .invitedUsers.values
+                                                    .toList()
+                                                    .elementAt(index)
+                                                    .user;
+                                                return Card(
+                                                  child: ListTile(
+                                                      leading: CircleAvatar(
+                                                        backgroundImage:
+                                                            Image.network(user
+                                                                    .profilePic)
+                                                                .image,
+                                                      ),
+                                                      title: Text(
+                                                        user.username,
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.black),
+                                                      )),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    });
+                              },
                             )
                           ],
                         ),

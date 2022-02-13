@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 
 import 'icon_text.dart';
@@ -56,18 +57,21 @@ class EventCard extends StatelessWidget {
                 color: Colors.grey,
                 height: 200 * 0.15,
                 child: Row(
-                  children: const [
-                    IconWithText(
-                        icon: Icon(
-                          Icons.person_outline,
-                          size: 20,
-                        ),
-                        textName: Text(
-                          "2",
-                          style: TextStyle(fontSize: 12),
-                        )),
-                    Spacer(),
-                    IconWithText(
+                  children: [
+                    Badge(
+                      padding: const EdgeInsets.all(3),
+                      shape: BadgeShape.circle,
+                      borderRadius: BorderRadius.circular(10),
+                      position: BadgePosition.topEnd(top: -5, end: -3),
+                      animationType: BadgeAnimationType.slide,
+                      badgeContent: const Text(
+                        "2",
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                      child: const Icon(Icons.person),
+                    ),
+                    const Spacer(),
+                    const IconWithText(
                       icon: Icon(
                         Icons.date_range,
                         size: 20,
@@ -75,8 +79,8 @@ class EventCard extends StatelessWidget {
                       textName:
                           Text("22-02-2022", style: TextStyle(fontSize: 12)),
                     ),
-                    Spacer(),
-                    IconWithText(
+                    const Spacer(),
+                    const IconWithText(
                       icon: Icon(
                         Icons.location_pin,
                         size: 20,

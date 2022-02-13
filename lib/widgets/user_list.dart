@@ -1,12 +1,12 @@
-import 'dart:async';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_login/provider/models/user.dart';
+import 'package:provider/provider.dart';
 
-import '../provider/models/user.dart';
+import '../provider/models/invited_user.dart';
 
 class UserList extends StatefulWidget {
-  final List<UserDetails>? peopleToInvite;
+  final InvitedUser peopleToInvite;
   final List<UserDetails>? userEmails;
 
   const UserList({
@@ -20,125 +20,135 @@ class UserList extends StatefulWidget {
 }
 
 class _UserListState extends State<UserList> {
-  final peopleToInviteStream = StreamController<List<UserDetails>>();
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-
-    peopleToInviteStream.close();
-
-    super.dispose();
-  }
+  List<InvitedUserItem> searchUserList = [];
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints:
-          BoxConstraints(minHeight: MediaQuery.of(context).size.height * 0.35),
-      color: Colors.red.withOpacity(0),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: TextField(
-                style: const TextStyle(color: Colors.white70),
-                decoration: InputDecoration(
-                    prefixIcon: GestureDetector(
-                      onTap: () {},
-                      child: const Icon(
-                        Icons.supervised_user_circle_sharp,
-                        color: Colors.white70,
+    return Consumer<InvitedUser>(
+        builder: (context, invitedUser, child) => SingleChildScrollView(
+              child: Container(
+                height: MediaQuery.of(context).size.height -
+                    (MediaQuery.of(context).size.height * 0.25),
+                // constraints:
+                //     BoxConstraints(minHeight: MediaQuery.of(context).size.height * 0.35),
+                color: Colors.red.withOpacity(0),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: TextField(
+                          style: const TextStyle(color: Colors.white70),
+                          decoration: InputDecoration(
+                              prefixIcon: GestureDetector(
+                                onTap: () {},
+                                child: const Icon(
+                                  Icons.supervised_user_circle_sharp,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              hintText: "Find users to invite",
+                              hintStyle: const TextStyle(color: Colors.white70),
+                              // errorText: "Invalid input",
+                              label: const Text(
+                                "Search user",
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.blueGrey,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0)),
+                              border: OutlineInputBorder(
+                                  borderSide: const BorderSide(
+                                    color: Colors.blueGrey,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8.0)),
+                              focusedBorder: const OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Colors.teal, width: 2))),
+                          // The validator receives
+                          onChanged: (selectedValue) {
+                            searchUserList.clear();
+
+                            if (invitedUser.invitedUsers.isNotEmpty) {
+                              InvitedUserItem? temp = invitedUser
+                                  .invitedUsers.values
+                                  .firstWhereOrNull((element) =>
+                                      element.user.username == selectedValue);
+
+                              if (temp != null) {
+                                searchUserList.add(temp);
+                              }
+                            }
+
+                            if (widget.peopleToInvite.invitedUsers.length <
+                                (widget.userEmails as List).length) {
+                              List<UserDetails>? foundUsers = widget.userEmails
+                                  ?.where((element) =>
+                                      element.username == selectedValue)
+                                  .toList();
+                              if (foundUsers != null && foundUsers.isNotEmpty) {
+                                // widget.peopleToInvite.addUserToList(...foundUsers);
+
+                                for (var foundUser in foundUsers) {
+                                  InvitedUserItem? doesExist = searchUserList
+                                      .firstWhereOrNull((element) =>
+                                          element.user.email ==
+                                          foundUser.email);
+
+                                  if (doesExist == null) {
+                                    searchUserList
+                                        .add(InvitedUserItem(user: foundUser));
+                                  }
+                                }
+
+                                FocusManager.instance.primaryFocus?.unfocus();
+                              }
+                            }
+                          },
+                        ),
                       ),
-                    ),
-                    hintText: "Find users to invite",
-                    hintStyle: const TextStyle(color: Colors.white70),
-                    // errorText: "Invalid input",
-                    label: const Text(
-                      "Search user",
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: Colors.blueGrey,
-                        ),
-                        borderRadius: BorderRadius.circular(8.0)),
-                    border: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          color: Colors.blueGrey,
-                        ),
-                        borderRadius: BorderRadius.circular(8.0)),
-                    focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.teal, width: 2))),
-                // The validator receives
-                onChanged: (selectedValue) {
-                  if (widget.peopleToInvite!.length <
-                      (widget.userEmails as List).length) {
-                    UserDetails? foundUser = widget.userEmails
-                        ?.firstWhereOrNull(
-                            (element) => element.username == selectedValue);
-
-                    UserDetails? alreadyInList = widget.peopleToInvite
-                        ?.firstWhereOrNull(
-                            (element) => foundUser?.id == element.id);
-
-                    if (foundUser != null && alreadyInList == null) {
-                      widget.peopleToInvite?.add(foundUser);
-
-                      peopleToInviteStream.sink.add(widget.peopleToInvite!);
-
-                      // print('found!');
-                    }
-                  }
-                },
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            StreamBuilder(
-                stream: peopleToInviteStream.stream,
-                builder: (ctx, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting ||
-                      snapshot.data == null) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.data != null) {
-                    List<UserDetails> selectedUsers =
-                        snapshot.data as List<UserDetails>;
-                    return Container(
-                      color: Colors.transparent,
-                      padding: const EdgeInsets.all(0.0),
-                      // decoration: BoxDecoration(
-                      //     border: Border.all(color: Colors.blueGrey),
-                      //     borderRadius: BorderRadius.circular(8.00),
-                      //     color: Colors.red),
-                      child: ListView.builder(
-                          itemCount: selectedUsers.length,
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      ListView.builder(
+                          itemCount: searchUserList.length,
                           shrinkWrap: true,
-                          itemBuilder: (ctx, index) {
-                            return UserListItem(
-                                foundUser: selectedUsers[index]);
+                          itemBuilder: (ctx, i) {
+                            return searchUserList.isEmpty
+                                ? const Text('No one is invited yet!',
+                                    style: TextStyle(color: Colors.white))
+                                : Container(
+                                    color: Colors.transparent,
+                                    padding: const EdgeInsets.all(0.0),
+                                    // decoration: BoxDecoration(
+                                    //     border: Border.all(color: Colors.blueGrey),
+                                    //     borderRadius: BorderRadius.circular(8.00),
+                                    //     color: Colors.red),
+                                    child: UserListItem(
+                                        foundUser: searchUserList[i],
+                                        invitedUsers: invitedUser));
                           }),
-                    );
-                  } else {
-                    return const Text('Nothing to Show');
-                  }
-                }),
-          ],
-        ),
-      ),
-    );
+                    ],
+                  ),
+                ),
+              ),
+            ));
   }
 }
 
 class UserListItem extends StatefulWidget {
-  final UserDetails foundUser;
+  final InvitedUserItem foundUser;
 
-  const UserListItem({required this.foundUser, Key? key}) : super(key: key);
+  InvitedUser invitedUsers;
+
+  UserListItem({
+    required this.foundUser,
+    Key? key,
+    required this.invitedUsers,
+  }) : super(key: key);
 
   @override
   State<UserListItem> createState() => _UserListItemState();
@@ -149,17 +159,22 @@ class _UserListItemState extends State<UserListItem> {
   Widget build(BuildContext context) {
     return Card(
       child: CheckboxListTile(
-        title: Text(widget.foundUser.username),
-        value: false,
+        title: Text(widget.foundUser.user.username),
+        value: widget.foundUser.isInvited,
         controlAffinity: ListTileControlAffinity.trailing,
         secondary: CircleAvatar(
-          backgroundImage: Image.network(widget.foundUser.profilePic).image,
+          backgroundImage:
+              Image.network(widget.foundUser.user.profilePic).image,
         ),
         onChanged: (bool? value) {
-          // TODO implement add/remove person from PeopleToInviteList
-
           setState(() {
-            // _isChecked = !_isChecked;
+            widget.foundUser.isInvited = !widget.foundUser.isInvited;
+
+            if (widget.foundUser.isInvited) {
+              widget.invitedUsers.addUserToList(widget.foundUser.user);
+            } else {
+              widget.invitedUsers.removeUserFromList(widget.foundUser.user);
+            }
           });
         },
       ),
