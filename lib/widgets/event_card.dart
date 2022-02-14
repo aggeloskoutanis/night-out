@@ -76,8 +76,7 @@ class EventCard extends StatelessWidget {
                         Icons.date_range,
                         size: 20,
                       ),
-                      textName:
-                          Text("22-02-2022", style: TextStyle(fontSize: 12)),
+                      textName: Text("22-02-2022", style: TextStyle(fontFamily: 'Quicksand', fontStyle: FontStyle.italic, fontWeight: FontWeight.w400)),
                     ),
                     const Spacer(),
                     const IconWithText(
@@ -85,8 +84,7 @@ class EventCard extends StatelessWidget {
                         Icons.location_pin,
                         size: 20,
                       ),
-                      textName: Text("Athens, Greece",
-                          style: TextStyle(fontSize: 12)),
+                      textName: Text("Athens, Greece", style: TextStyle(fontFamily: 'Lato', fontStyle: FontStyle.italic, fontWeight: FontWeight.w400)),
                     ),
                   ],
                 ),

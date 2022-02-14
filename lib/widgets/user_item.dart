@@ -9,12 +9,7 @@ class UserItem extends StatelessWidget {
   final UserDetails userDetails;
   final List<UserDetails> userList;
   final StreamSink<List<UserDetails>> streamSink;
-  const UserItem(
-      {Key? key,
-      required this.userDetails,
-      required this.userList,
-      required this.streamSink})
-      : super(key: key);
+  const UserItem({Key? key, required this.userDetails, required this.userList, required this.streamSink}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +40,7 @@ class UserItem extends StatelessWidget {
             ),
           ],
         ),
-        child: UserTile(
-            username: userDetails.username, picture: userDetails.profilePic));
+        child: UserTile(username: userDetails.username, picture: userDetails.profilePic));
   }
 
   void doNothing(BuildContext context) {}
@@ -68,10 +62,9 @@ class UserTile extends StatelessWidget {
                 fit: BoxFit.contain,
               )
             : null,
-        backgroundImage:
-            (picture != null) ? Image.network(picture!).image : null,
+        backgroundImage: (picture != null) ? Image.network(picture!).image : null,
       ),
-      title: Text(username!),
+      title: Text(username!, style: TextStyle(fontFamily: 'Lato', fontStyle: FontStyle.normal, fontWeight: FontWeight.w400)),
     );
   }
 }

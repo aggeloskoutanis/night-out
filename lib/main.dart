@@ -31,20 +31,15 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider.value(value: Auth()),
           ChangeNotifierProxyProvider<Auth, Events>(
               create: (context) => Events.defaultConstructor(),
-              update: (context, auth, previousInstanceOfEvents) => Events(
-                  auth.token,
-                  auth.userId,
-                  previousInstanceOfEvents == null
-                      ? []
-                      : previousInstanceOfEvents.events))
+              update: (context, auth, previousInstanceOfEvents) => Events(auth.token, auth.userId, previousInstanceOfEvents == null ? [] : previousInstanceOfEvents.events))
         ],
         child: Consumer<Auth>(
           builder: (ctx, auth, _) => MaterialApp(
             title: 'Counter App Example',
             theme: ThemeData(
+              fontFamily: 'Quicksand',
               primaryColor: Colors.red.shade800,
-              colorScheme: ColorScheme.fromSwatch()
-                  .copyWith(secondary: Colors.red.shade600),
+              colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red.shade600),
             ),
             debugShowCheckedModeBanner: false,
             // home: auth.isAuth ? EventsOverviewScreen() : AuthScreen(),
@@ -56,11 +51,7 @@ class MyApp extends StatelessWidget {
                   }
                   return const AuthScreen();
                 }),
-            routes: {
-              AuthScreen.routeName: (ctx) => const AuthScreen(),
-              EventCreationScreen.routeName: (ctx) =>
-                  const EventCreationScreen()
-            },
+            routes: {AuthScreen.routeName: (ctx) => const AuthScreen(), EventCreationScreen.routeName: (ctx) => const EventCreationScreen()},
           ),
         ));
   }

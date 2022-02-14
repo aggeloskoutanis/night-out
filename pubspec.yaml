@@ -37,3 +37,21 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+  fonts:
+    - family: Lato
+      fonts:
+        - asset: assets/fonts/Lato/Lato-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Lato/Lato-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Lato/Lato-LightItalic.ttf
+          weight: 300
+
+    - family: Quicksand
+      fonts:
+        - asset: assets/fonts/Quicksand/Quicksand-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Quicksand/Quicksand-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Quicksand/Quicksand-Light.ttf
+          weight: 300

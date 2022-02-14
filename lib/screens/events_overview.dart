@@ -27,10 +27,7 @@ class EventsOverviewScreen extends StatelessWidget {
               icon: const Icon(Icons.logout))
         ],
         backgroundColor: Colors.black87,
-        title: const Text(
-          'Recent events',
-          style: TextStyle(fontSize: 15),
-        ),
+        title: const Text('Recent events', style: TextStyle(fontFamily: 'Quicksand', fontWeight: FontWeight.w700)),
       ),
       body: Container(
         decoration: BoxDecoration(

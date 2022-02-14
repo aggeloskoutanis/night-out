@@ -27,8 +27,7 @@ class _UserListState extends State<UserList> {
     return Consumer<InvitedUser>(
         builder: (context, invitedUser, child) => SingleChildScrollView(
               child: Container(
-                height: MediaQuery.of(context).size.height -
-                    (MediaQuery.of(context).size.height * 0.25),
+                height: MediaQuery.of(context).size.height - (MediaQuery.of(context).size.height * 0.26),
                 // constraints:
                 //     BoxConstraints(minHeight: MediaQuery.of(context).size.height * 0.35),
                 color: Colors.red.withOpacity(0),
@@ -65,42 +64,29 @@ class _UserListState extends State<UserList> {
                                     color: Colors.blueGrey,
                                   ),
                                   borderRadius: BorderRadius.circular(8.0)),
-                              focusedBorder: const OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Colors.teal, width: 2))),
+                              focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.teal, width: 2))),
                           // The validator receives
                           onChanged: (selectedValue) {
                             searchUserList.clear();
 
                             if (invitedUser.invitedUsers.isNotEmpty) {
-                              InvitedUserItem? temp = invitedUser
-                                  .invitedUsers.values
-                                  .firstWhereOrNull((element) =>
-                                      element.user.username == selectedValue);
+                              InvitedUserItem? temp = invitedUser.invitedUsers.values.firstWhereOrNull((element) => element.user.username == selectedValue);
 
                               if (temp != null) {
                                 searchUserList.add(temp);
                               }
                             }
 
-                            if (widget.peopleToInvite.invitedUsers.length <
-                                (widget.userEmails as List).length) {
-                              List<UserDetails>? foundUsers = widget.userEmails
-                                  ?.where((element) =>
-                                      element.username == selectedValue)
-                                  .toList();
+                            if (widget.peopleToInvite.invitedUsers.length < (widget.userEmails as List).length) {
+                              List<UserDetails>? foundUsers = widget.userEmails?.where((element) => element.username == selectedValue).toList();
                               if (foundUsers != null && foundUsers.isNotEmpty) {
                                 // widget.peopleToInvite.addUserToList(...foundUsers);
 
                                 for (var foundUser in foundUsers) {
-                                  InvitedUserItem? doesExist = searchUserList
-                                      .firstWhereOrNull((element) =>
-                                          element.user.email ==
-                                          foundUser.email);
+                                  InvitedUserItem? doesExist = searchUserList.firstWhereOrNull((element) => element.user.email == foundUser.email);
 
                                   if (doesExist == null) {
-                                    searchUserList
-                                        .add(InvitedUserItem(user: foundUser));
+                                    searchUserList.add(InvitedUserItem(user: foundUser));
                                   }
                                 }
 
@@ -118,8 +104,7 @@ class _UserListState extends State<UserList> {
                           shrinkWrap: true,
                           itemBuilder: (ctx, i) {
                             return searchUserList.isEmpty
-                                ? const Text('No one is invited yet!',
-                                    style: TextStyle(color: Colors.white))
+                                ? const Text('No one is invited yet!', style: TextStyle(color: Colors.white))
                                 : Container(
                                     color: Colors.transparent,
                                     padding: const EdgeInsets.all(0.0),
@@ -127,9 +112,7 @@ class _UserListState extends State<UserList> {
                                     //     border: Border.all(color: Colors.blueGrey),
                                     //     borderRadius: BorderRadius.circular(8.00),
                                     //     color: Colors.red),
-                                    child: UserListItem(
-                                        foundUser: searchUserList[i],
-                                        invitedUsers: invitedUser));
+                                    child: UserListItem(foundUser: searchUserList[i], invitedUsers: invitedUser));
                           }),
                     ],
                   ),
@@ -159,12 +142,11 @@ class _UserListItemState extends State<UserListItem> {
   Widget build(BuildContext context) {
     return Card(
       child: CheckboxListTile(
-        title: Text(widget.foundUser.user.username),
+        title: Text(widget.foundUser.user.username, style: TextStyle(fontFamily: 'Quicksand', fontStyle: FontStyle.normal, fontWeight: FontWeight.w400)),
         value: widget.foundUser.isInvited,
         controlAffinity: ListTileControlAffinity.trailing,
         secondary: CircleAvatar(
-          backgroundImage:
-              Image.network(widget.foundUser.user.profilePic).image,
+          backgroundImage: Image.network(widget.foundUser.user.profilePic).image,
         ),
         onChanged: (bool? value) {
           setState(() {
