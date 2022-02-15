@@ -1,14 +1,10 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import './../provider/models/user.dart';
 import '../provider/models/invited_user.dart';
+import '../widgets/searchable_map.dart';
 import '../widgets/user_list.dart';
 import '../widgets/user_list_item.dart';
 
@@ -25,12 +21,9 @@ class _EventCreationFormState extends State<EventCreationForm> {
 
   List<UserDetails>? userEmails = [];
 
-  double lat = 51.5;
-  double lon = -0.09;
-
-  int streamCounter = -1;
-
+  // MapController? mapController;
   final TextEditingController _controller = TextEditingController();
+
   @override
   void dispose() {
     _controller.dispose();
@@ -192,35 +185,9 @@ class _EventCreationFormState extends State<EventCreationForm> {
                           ),
                           Expanded(
                               child: Container(
-                            decoration: BoxDecoration(
-                                shape: BoxShape.rectangle, color: Colors.white.withOpacity(1), border: Border.all(color: Colors.blueGrey), borderRadius: BorderRadius.all(Radius.circular(8))),
-                            child: FlutterMap(
-                                options: MapOptions(
-                                  center: LatLng(51.5, -0.09),
-                                  zoom: 13.0,
-                                ),
-                                layers: [
-                                  TileLayerOptions(
-                                    urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                                    subdomains: ['a', 'b', 'c'],
-                                    attributionBuilder: (_) {
-                                      return Text("© OpenStreetMap contributors");
-                                    },
-                                  ),
-                                  MarkerLayerOptions(
-                                    markers: [
-                                      Marker(
-                                        width: 80.0,
-                                        height: 80.0,
-                                        point: LatLng(51.5, -0.09),
-                                        builder: (ctx) => Container(
-                                          child: FlutterLogo(),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ]),
-                          ))
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.rectangle, color: Colors.white.withOpacity(1), border: Border.all(color: Colors.blueGrey), borderRadius: BorderRadius.all(Radius.circular(8))),
+                                  child: SearchableMap()))
                         ],
                       ),
                     ),
@@ -230,11 +197,5 @@ class _EventCreationFormState extends State<EventCreationForm> {
             return const Text('Loading');
           }
         });
-  }
-
-  Future<List<Location>> findAddress() async {
-    List<Location> location = await locationFromAddress(_controller.text);
-
-    return location;
   }
 }

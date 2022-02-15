@@ -16,17 +16,18 @@ dependencies:
   flutter:
     sdk: flutter
 
-  font_awesome_flutter: ^9.1.0
   http: any
   provider: any
   flutter_native_splash: ^2.0.2
   flutter_map: ^0.14.0
   latlong2: ^0.8.0
-  geocoding: ^2.0.2
+  flutter_geocoder: ^0.2.2-nullsafety
   flutter_slidable: ^1.2.0
   image_picker: ^0.8.4+7
   badges: ^2.0.2
   flutter_lints: ^1.0.4
+  awesome_icons: ^1.1.0
+  animations: ^2.0.2
 
 dev_dependencies:
   flutter_test:
