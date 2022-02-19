@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_geocoder/geocoder.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 
+import '../provider/models/invited_user.dart';
 import 'address_item.dart';
 
 class SearchableMap extends StatefulWidget {
-  const SearchableMap({Key? key}) : super(key: key);
+  final String eventName;
+
+  const SearchableMap({required this.eventName, Key? key}) : super(key: key);
 
   @override
   _SearchableMapState createState() => _SearchableMapState();
@@ -47,16 +51,36 @@ class _SearchableMapState extends State<SearchableMap> {
                           width: 30.0,
                           height: 30.0,
                           point: latlng,
-                          builder: (ctx) => Container(
-                            child: const Icon(FontAwesomeIcons.mapPin, color: Colors.teal),
-                          ),
+                          builder: (ctx) => const Icon(FontAwesomeIcons.mapPin, color: Colors.teal),
                         )
                       ],
                     ),
                   ]);
             },
             valueListenable: latlng),
-        SearchStack(addressToSearch: addressToSearch, controller: _controller, latlng: latlng)
+        SearchStack(addressToSearch: addressToSearch, controller: _controller, latlng: latlng),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: FloatingActionButton.extended(
+              onPressed: () async {
+                if (widget.eventName.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid event name')));
+                  return;
+                }
+                int amountOfPeopleInvited = Provider.of<InvitedUser>(context, listen: false).invitedUsers.length;
+                if (amountOfPeopleInvited < 1) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invite people!')));
+                  return;
+                }
+              },
+              backgroundColor: Colors.black54,
+              label: const Text('Create event'),
+              icon: const Icon(Icons.event),
+            ),
+          ),
+        )
       ],
     );
   }

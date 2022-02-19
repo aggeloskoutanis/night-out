@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +19,6 @@ class EventCreationForm extends StatefulWidget {
 
 class _EventCreationFormState extends State<EventCreationForm> {
   final _formKey = GlobalKey<FormState>();
-  String? eventName;
 
   List<UserDetails>? userEmails = [];
 
@@ -32,7 +33,9 @@ class _EventCreationFormState extends State<EventCreationForm> {
 
   @override
   Widget build(BuildContext context) {
-    final peopleToInvite = Provider.of<InvitedUser>(context);
+    ValueNotifier<String> eventName = ValueNotifier<String>('');
+
+    final peopleToInvite = Provider.of<InvitedUser>(context, listen: false);
 
     return FutureBuilder<QuerySnapshot>(
         future: FirebaseFirestore.instance.collection('users').get(),
@@ -71,8 +74,8 @@ class _EventCreationFormState extends State<EventCreationForm> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           TextFormField(
-                            onSaved: (value) {
-                              eventName = value!;
+                            onChanged: (value) {
+                              eventName.value = value;
                             },
                             style: const TextStyle(color: Colors.white70),
                             keyboardType: TextInputType.emailAddress,
@@ -121,7 +124,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                           shape: BoxShape.rectangle,
                                           color: Colors.white.withOpacity(.1),
                                           border: Border.all(color: Colors.blueGrey),
-                                          borderRadius: BorderRadius.all(Radius.circular(8))),
+                                          borderRadius: const BorderRadius.all(Radius.circular(8))),
                                       // margin: EdgeInsets.all(4),
                                       child: const Icon(
                                         Icons.search_off,
@@ -144,7 +147,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                   child: GestureDetector(
                                 child: Container(
                                   height: 50,
-                                  margin: EdgeInsets.all(4),
+                                  margin: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
                                       shape: BoxShape.rectangle, color: Colors.white.withOpacity(.1), border: Border.all(color: Colors.blueGrey), borderRadius: BorderRadius.all(Radius.circular(8))),
                                   child: const Icon(
@@ -163,7 +166,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                         return Consumer<InvitedUser>(
                                           builder: (context, invitedUsers, child) => SingleChildScrollView(
                                             child: Container(
-                                              padding: EdgeInsets.all(8.0),
+                                              padding: const EdgeInsets.all(8.0),
                                               height: MediaQuery.of(context).size.height - (MediaQuery.of(context).size.height * 0.26),
                                               child: ListView.builder(
                                                 itemCount: invitedUsers.invitedUsers.length,
@@ -186,8 +189,13 @@ class _EventCreationFormState extends State<EventCreationForm> {
                           Expanded(
                               child: Container(
                                   decoration: BoxDecoration(
-                                      shape: BoxShape.rectangle, color: Colors.white.withOpacity(1), border: Border.all(color: Colors.blueGrey), borderRadius: BorderRadius.all(Radius.circular(8))),
-                                  child: SearchableMap()))
+                                      shape: BoxShape.rectangle, color: Colors.white.withOpacity(.1), border: Border.all(color: Colors.blueGrey), borderRadius: BorderRadius.all(Radius.circular(8))),
+                                  child: ValueListenableBuilder<String>(
+                                    builder: (context, event, child) => SearchableMap(
+                                      eventName: event,
+                                    ),
+                                    valueListenable: eventName,
+                                  ))),
                         ],
                       ),
                     ),

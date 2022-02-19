@@ -103,16 +103,11 @@ class _UserListState extends State<UserList> {
                           itemCount: searchUserList.length,
                           shrinkWrap: true,
                           itemBuilder: (ctx, i) {
-                            return searchUserList.isEmpty
-                                ? const Text('No one is invited yet!', style: TextStyle(color: Colors.white))
-                                : Container(
-                                    color: Colors.transparent,
-                                    padding: const EdgeInsets.all(0.0),
-                                    // decoration: BoxDecoration(
-                                    //     border: Border.all(color: Colors.blueGrey),
-                                    //     borderRadius: BorderRadius.circular(8.00),
-                                    //     color: Colors.red),
-                                    child: UserListItem(foundUser: searchUserList[i], invitedUsers: invitedUser));
+                            if (searchUserList.isEmpty) {
+                              return const Text('No one is invited yet!', style: TextStyle(color: Colors.white));
+                            } else {
+                              return Container(color: Colors.transparent, child: UserListItem(foundUser: searchUserList[i], invitedUsers: invitedUser));
+                            }
                           }),
                     ],
                   ),
@@ -122,42 +117,34 @@ class _UserListState extends State<UserList> {
   }
 }
 
-class UserListItem extends StatefulWidget {
+class UserListItem extends StatelessWidget {
   final InvitedUserItem foundUser;
 
-  InvitedUser invitedUsers;
+  final InvitedUser invitedUsers;
 
-  UserListItem({
+  const UserListItem({
     required this.foundUser,
     Key? key,
     required this.invitedUsers,
   }) : super(key: key);
-
-  @override
-  State<UserListItem> createState() => _UserListItemState();
-}
-
-class _UserListItemState extends State<UserListItem> {
   @override
   Widget build(BuildContext context) {
     return Card(
       child: CheckboxListTile(
-        title: Text(widget.foundUser.user.username, style: TextStyle(fontFamily: 'Quicksand', fontStyle: FontStyle.normal, fontWeight: FontWeight.w400)),
-        value: widget.foundUser.isInvited,
+        title: Text(foundUser.user.username, style: const TextStyle(fontFamily: 'Quicksand', fontStyle: FontStyle.normal, fontWeight: FontWeight.w400)),
+        value: foundUser.isInvited,
         controlAffinity: ListTileControlAffinity.trailing,
         secondary: CircleAvatar(
-          backgroundImage: Image.network(widget.foundUser.user.profilePic).image,
+          backgroundImage: Image.network(foundUser.user.profilePic).image,
         ),
         onChanged: (bool? value) {
-          setState(() {
-            widget.foundUser.isInvited = !widget.foundUser.isInvited;
+          foundUser.isInvited = !foundUser.isInvited;
 
-            if (widget.foundUser.isInvited) {
-              widget.invitedUsers.addUserToList(widget.foundUser.user);
-            } else {
-              widget.invitedUsers.removeUserFromList(widget.foundUser.user);
-            }
-          });
+          if (foundUser.isInvited) {
+            invitedUsers.addUserToList(foundUser.user);
+          } else {
+            invitedUsers.removeUserFromList(foundUser.user);
+          }
         },
       ),
     );
