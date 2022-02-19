@@ -1,4 +1,5 @@
 import 'package:awesome_icons/awesome_icons.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_geocoder/geocoder.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -64,16 +65,23 @@ class _SearchableMapState extends State<SearchableMap> {
           child: Align(
             alignment: Alignment.bottomRight,
             child: FloatingActionButton.extended(
+              heroTag: "submitEvent",
               onPressed: () async {
                 if (widget.eventName.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid event name')));
                   return;
                 }
-                int amountOfPeopleInvited = Provider.of<InvitedUser>(context, listen: false).invitedUsers.length;
-                if (amountOfPeopleInvited < 1) {
+
+                final invitedUsers = Provider.of<InvitedUser>(context, listen: false).invitedUsers;
+
+                if (invitedUsers.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invite people!')));
                   return;
                 }
+
+                registerEvent(widget.eventName, invitedUsers, latlng.value);
+
+                Navigator.pop(context);
               },
               backgroundColor: Colors.black54,
               label: const Text('Create event'),
@@ -83,6 +91,21 @@ class _SearchableMapState extends State<SearchableMap> {
         )
       ],
     );
+  }
+
+  void registerEvent(String eventName, Map<String, InvitedUserItem> invitedUsers, LatLng latlng) async {
+    await FirebaseFirestore.instance.collection('events').add({
+      'event_location': latlng.latitude.toString() + ', ' + latlng.longitude.toString(),
+      'event_name': eventName,
+      'images': [],
+      'invited_users': FieldValue.arrayUnion(invitedUsers.values
+          .map(
+            (value) => value.user.id,
+          )
+          .toList())
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Event created successfully!')));
   }
 }
 
@@ -109,9 +132,11 @@ class _SearchStackState extends State<SearchStack> {
           child: Align(
               alignment: Alignment.topRight,
               child: FloatingActionButton.small(
+                  heroTag: "searchAddress",
                   backgroundColor: Colors.black54,
                   child: const Icon(FontAwesomeIcons.locationArrow, size: 16),
                   onPressed: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
                     if (_popInWidget == null) {
                       _popInWidget = AnimatedSearch(
                         addressToSearch: widget.addressToSearch,

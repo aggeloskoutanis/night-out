@@ -11,7 +11,7 @@ class AddressItem extends StatelessWidget {
       color: Colors.white70,
       child: ListTile(
         leading: const Icon(Icons.location_pin),
-        title: Text(streetDetails, style: TextStyle(fontSize: 10)),
+        title: Text(streetDetails, style: const TextStyle(fontSize: 10)),
       ),
     );
   }

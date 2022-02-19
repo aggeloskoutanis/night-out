@@ -64,7 +64,7 @@ class UserTile extends StatelessWidget {
             : null,
         backgroundImage: (picture != null) ? Image.network(picture!).image : null,
       ),
-      title: Text(username!, style: TextStyle(fontFamily: 'Lato', fontStyle: FontStyle.normal, fontWeight: FontWeight.w400)),
+      title: Text(username!, style: const TextStyle(fontFamily: 'Lato', fontStyle: FontStyle.normal, fontWeight: FontWeight.w400)),
     );
   }
 }

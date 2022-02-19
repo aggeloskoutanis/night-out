@@ -132,6 +132,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                       ),
                                     ),
                                     onTap: () {
+                                      FocusManager.instance.primaryFocus?.unfocus();
                                       showModalBottomSheet(
                                           isScrollControlled: true,
                                           backgroundColor: Colors.black54,
@@ -156,6 +157,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                   ),
                                 ),
                                 onTap: () {
+                                  FocusManager.instance.primaryFocus?.unfocus();
                                   showModalBottomSheet(
                                       isScrollControlled: true,
                                       backgroundColor: Colors.black87,
