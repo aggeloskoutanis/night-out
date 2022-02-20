@@ -33,8 +33,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
 
   @override
   Widget build(BuildContext context) {
-    ValueNotifier<String> eventName = ValueNotifier<String>('');
-
+    ValueNotifier<EventDetails> eventDetails = ValueNotifier<EventDetails>(EventDetails('', DateTime(DateTime.now().year - 1)));
     final peopleToInvite = Provider.of<InvitedUser>(context, listen: false);
 
     return FutureBuilder<QuerySnapshot>(
@@ -75,7 +74,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                         children: [
                           TextFormField(
                             onChanged: (value) {
-                              eventName.value = value;
+                              eventDetails.value.eventName = value;
                             },
                             style: const TextStyle(color: Colors.white70),
                             keyboardType: TextInputType.emailAddress,
@@ -126,10 +125,16 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                           border: Border.all(color: Colors.blueGrey),
                                           borderRadius: const BorderRadius.all(Radius.circular(8))),
                                       // margin: EdgeInsets.all(4),
-                                      child: const Icon(
-                                        Icons.search_off,
-                                        color: Colors.white,
-                                      ),
+                                      child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: const [
+                                        Icon(
+                                          Icons.search_off,
+                                          color: Colors.white,
+                                        ),
+                                        Text(
+                                          'Search users',
+                                          style: TextStyle(color: Colors.white70),
+                                        )
+                                      ]),
                                     ),
                                     onTap: () {
                                       FocusManager.instance.primaryFocus?.unfocus();
@@ -151,9 +156,67 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                   margin: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
                                       shape: BoxShape.rectangle, color: Colors.white.withOpacity(.1), border: Border.all(color: Colors.blueGrey), borderRadius: BorderRadius.all(Radius.circular(8))),
-                                  child: const Icon(
-                                    Icons.list_alt_outlined,
-                                    color: Colors.white,
+                                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: const [
+                                    Icon(
+                                      Icons.date_range,
+                                      color: Colors.white,
+                                    ),
+                                    Text(
+                                      'Pick date',
+                                      style: TextStyle(color: Colors.white70),
+                                    )
+                                  ]),
+                                ),
+                                onTap: () async {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  final DateTime now = DateTime.now();
+
+                                  eventDetails.value.eventDate = await showDatePicker(
+                                          context: context,
+                                          initialDate: now,
+                                          firstDate: DateTime(now.year, now.month, now.day),
+                                          lastDate: DateTime(now.year + 2),
+                                          builder: (context, child) {
+                                            return Theme(
+                                              data: ThemeData.dark().copyWith(
+                                                  colorScheme: const ColorScheme.dark(
+                                                      onPrimary: Colors.black, // selected text color
+                                                      onSurface: Colors.amberAccent, // default text color
+                                                      primary: Colors.amberAccent // circle color
+                                                      ),
+                                                  dialogBackgroundColor: Colors.black54,
+                                                  textButtonTheme: TextButtonThemeData(
+                                                      style: TextButton.styleFrom(
+                                                          textStyle: const TextStyle(color: Colors.amber, fontWeight: FontWeight.normal, fontSize: 12, fontFamily: 'Quicksand'),
+                                                          primary: Colors.amber, // color of button's letters
+                                                          backgroundColor: Colors.black54, // Background color
+                                                          shape: RoundedRectangleBorder(
+                                                              side: const BorderSide(color: Colors.transparent, width: 1, style: BorderStyle.solid), borderRadius: BorderRadius.circular(50))))),
+                                              child: child!,
+                                            );
+                                          }) ??
+                                      DateTime(2017);
+                                },
+                              )),
+                              Expanded(
+                                  child: GestureDetector(
+                                child: Container(
+                                  height: 50,
+                                  margin: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.rectangle, color: Colors.white.withOpacity(.1), border: Border.all(color: Colors.blueGrey), borderRadius: BorderRadius.all(Radius.circular(8))),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: const [
+                                      Icon(
+                                        Icons.list_alt_outlined,
+                                        color: Colors.white,
+                                      ),
+                                      Text(
+                                        'List users',
+                                        style: TextStyle(color: Colors.white70),
+                                      )
+                                    ],
                                   ),
                                 ),
                                 onTap: () {
@@ -189,15 +252,12 @@ class _EventCreationFormState extends State<EventCreationForm> {
                             ],
                           ),
                           Expanded(
-                              child: Container(
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.rectangle, color: Colors.white.withOpacity(.1), border: Border.all(color: Colors.blueGrey), borderRadius: BorderRadius.all(Radius.circular(8))),
-                                  child: ValueListenableBuilder<String>(
-                                    builder: (context, event, child) => SearchableMap(
-                                      eventName: event,
-                                    ),
-                                    valueListenable: eventName,
-                                  ))),
+                              child: ValueListenableBuilder<EventDetails>(
+                            builder: (context, event, child) => SearchableMap(
+                              eventDetails: event,
+                            ),
+                            valueListenable: eventDetails,
+                          )),
                         ],
                       ),
                     ),
@@ -208,4 +268,11 @@ class _EventCreationFormState extends State<EventCreationForm> {
           }
         });
   }
+}
+
+class EventDetails {
+  String eventName;
+  DateTime eventDate;
+
+  EventDetails(this.eventName, this.eventDate);
 }

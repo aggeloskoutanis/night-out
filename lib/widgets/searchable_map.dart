@@ -6,13 +6,14 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
+import '../forms/event_creation_form.dart';
 import '../provider/models/invited_user.dart';
 import 'address_item.dart';
 
 class SearchableMap extends StatefulWidget {
-  final String eventName;
+  final EventDetails eventDetails;
 
-  const SearchableMap({required this.eventName, Key? key}) : super(key: key);
+  const SearchableMap({required this.eventDetails, Key? key}) : super(key: key);
 
   @override
   _SearchableMapState createState() => _SearchableMapState();
@@ -67,7 +68,7 @@ class _SearchableMapState extends State<SearchableMap> {
             child: FloatingActionButton.extended(
               heroTag: "submitEvent",
               onPressed: () async {
-                if (widget.eventName.isEmpty) {
+                if (widget.eventDetails.eventName.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid event name')));
                   return;
                 }
@@ -79,7 +80,12 @@ class _SearchableMapState extends State<SearchableMap> {
                   return;
                 }
 
-                registerEvent(widget.eventName, invitedUsers, latlng.value);
+                if (widget.eventDetails.eventDate.year < DateTime.now().year) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please pick a date for the event to take place')));
+                  return;
+                }
+
+                registerEvent(widget.eventDetails, invitedUsers, latlng.value);
 
                 Navigator.pop(context);
               },
@@ -93,10 +99,11 @@ class _SearchableMapState extends State<SearchableMap> {
     );
   }
 
-  void registerEvent(String eventName, Map<String, InvitedUserItem> invitedUsers, LatLng latlng) async {
+  void registerEvent(EventDetails eventDetails, Map<String, InvitedUserItem> invitedUsers, LatLng latlng) async {
     await FirebaseFirestore.instance.collection('events').add({
       'event_location': latlng.latitude.toString() + ', ' + latlng.longitude.toString(),
-      'event_name': eventName,
+      'event_name': eventDetails.eventName,
+      'event_date': eventDetails.eventDate.toIso8601String(),
       'images': [],
       'invited_users': FieldValue.arrayUnion(invitedUsers.values
           .map(

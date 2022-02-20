@@ -38,8 +38,6 @@ class MyApp extends StatelessWidget {
             title: 'Counter App Example',
             theme: ThemeData(
               fontFamily: 'Quicksand',
-              primaryColor: Colors.red.shade800,
-              colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.red.shade600),
             ),
             debugShowCheckedModeBanner: false,
             // home: auth.isAuth ? EventsOverviewScreen() : AuthScreen(),
