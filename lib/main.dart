@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_firebase_login/provider/models/invited_user.dart';
 import 'package:flutter_firebase_login/screens/auth_screen.dart';
 import 'package:flutter_firebase_login/screens/event_creation_screen.dart';
+import 'package:flutter_firebase_login/screens/event_screen.dart';
 import 'package:flutter_firebase_login/screens/events_overview.dart';
+import 'package:flutter_firebase_login/widgets/event_card.dart';
 import 'package:provider/provider.dart';
 
 import './provider/events.dart';
@@ -49,7 +51,17 @@ class MyApp extends StatelessWidget {
                   }
                   return const AuthScreen();
                 }),
-            routes: {AuthScreen.routeName: (ctx) => const AuthScreen(), EventCreationScreen.routeName: (ctx) => const EventCreationScreen()},
+            routes: {
+              AuthScreen.routeName: (ctx) => const AuthScreen(),
+              EventCreationScreen.routeName: (ctx) => const EventCreationScreen(),
+            },
+            onGenerateRoute: (settings) {
+              if (settings.name == EventScreen.routeName) {
+                EventCard event = settings.arguments as EventCard;
+
+                return MaterialPageRoute(builder: (_) => EventScreen(event: event));
+              }
+            },
           ),
         ));
   }
