@@ -57,9 +57,14 @@ class MyApp extends StatelessWidget {
             },
             onGenerateRoute: (settings) {
               if (settings.name == EventScreen.routeName) {
-                EventCard event = settings.arguments as EventCard;
+                // EventCard event = settings.arguments as EventCard;
+                List<dynamic> args = settings.arguments as List<dynamic>;
 
-                return MaterialPageRoute(builder: (_) => EventScreen(event: event));
+                return MaterialPageRoute(
+                    builder: (_) => EventScreen(
+                          event: args[1] as EventCard,
+                          callback: args[0],
+                        ));
               }
             },
           ),

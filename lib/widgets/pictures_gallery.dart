@@ -1,58 +1,75 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_login/widgets/add_picture.dart';
+
+import 'event_card.dart';
 
 class PictureGallery extends StatefulWidget {
-  final List<dynamic> pictures;
+  final EventCard event;
+  final Function callback;
 
-  const PictureGallery({required this.pictures, Key? key}) : super(key: key);
+  const PictureGallery({required this.event, required this.callback, Key? key}) : super(key: key);
 
   @override
   State<PictureGallery> createState() => _PictureGalleryState();
 }
 
 class _PictureGalleryState extends State<PictureGallery> {
-  var _picToShow;
+  final List<dynamic> _picToShow = [];
+
   @override
   Widget build(BuildContext context) {
-    List<dynamic> picsToShow = [];
-    if (widget.pictures.isEmpty) {
-      picsToShow.add(SizedBox(width: 80, height: 50, child: Image.asset('assets/picture_placeholder.png')));
-    } else {
-      widget.pictures.forEach((pic) {
-        picsToShow.add(SizedBox(
-            width: 80,
-            height: 50,
-            child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _picToShow = Image(width: 80, height: 50, fit: BoxFit.fill, image: NetworkImage(pic));
-                  });
-                },
-                child: Picture(imgUrl: pic))));
+    void _addPicture(String picPath) {
+      setState(() {
+        widget.event.pictures!.insert(0, picPath);
+        widget.callback();
       });
     }
-    return Column(
-      children: [
-        SizedBox(
-            height: MediaQuery.of(context).size.height * 0.30,
-            width: MediaQuery.of(context).size.width,
-            child: widget.pictures.isEmpty
-                ? SizedBox(width: 80, height: 50, child: Image.asset('assets/picture_placeholder.png'))
-                : (_picToShow ?? Image(width: 80, height: 50, fit: BoxFit.fill, image: NetworkImage(widget.pictures.first)))),
-        Row(
-          children: [...picsToShow],
-        )
-      ],
+
+    // _picToShow.clear();
+    if (_picToShow.isEmpty) {
+      _picToShow.addAll(widget.event.pictures!);
+      _picToShow.add(AddPicture(
+        eventId: widget.event.id,
+        callback: _addPicture,
+      ));
+    } else {
+      _picToShow.insert(0, widget.event.pictures!.first);
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              childAspectRatio: 1,
+              crossAxisCount: 2,
+            ),
+            shrinkWrap: true,
+            itemCount: _picToShow.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Card(
+                  semanticContainer: true,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  child: _picToShow[index] is String ? Image.network(_picToShow[index], fit: BoxFit.fill) : _picToShow[index],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  elevation: 5,
+                  shadowColor: Colors.black87,
+                  margin: const EdgeInsets.all(3),
+                ),
+              );
+            },
+          )
+        ],
+      ),
     );
-  }
-}
-
-class Picture extends StatelessWidget {
-  final String imgUrl;
-
-  const Picture({required this.imgUrl, Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.network(imgUrl);
   }
 }

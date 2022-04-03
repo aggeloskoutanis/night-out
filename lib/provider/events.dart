@@ -11,6 +11,10 @@ class Events with ChangeNotifier {
   Events.defaultConstructor();
   Events(this.authToken, this.userId, this._events);
 
+  String? getCurrentUserId() {
+    return userId;
+  }
+
   List<Event> get events {
     // if (_showFavoritesOnly) {
     //   return _items.where((prodItem) => prodItem.isFavorite).toList();

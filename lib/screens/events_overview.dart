@@ -44,6 +44,7 @@ class EventsOverviewScreen extends StatelessWidget {
               final fetchedData = snapshot.data?.docs;
               fetchedData?.forEach((element) {
                 events.add(EventCard(
+                    id: element.id,
                     eventName: element['event_name'] as String,
                     eventDate: element['event_date'] as String,
                     eventLocation: element['event_location'] as String,

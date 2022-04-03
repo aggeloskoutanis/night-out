@@ -26,8 +26,7 @@ class InvitedUser with ChangeNotifier {
 
       return;
     } else {
-      _invitedUsers.putIfAbsent(
-          user.email, () => InvitedUserItem(user: user, isInvited: true));
+      _invitedUsers.putIfAbsent(user.email, () => InvitedUserItem(user: user, isInvited: true));
     }
 
     notifyListeners();
@@ -37,8 +36,7 @@ class InvitedUser with ChangeNotifier {
     if (!_invitedUsers.containsKey(user.email)) {
       return;
     } else {
-      _invitedUsers.removeWhere(
-          (key, invitedUserItem) => invitedUserItem.user.email == user.email);
+      _invitedUsers.removeWhere((key, invitedUserItem) => invitedUserItem.user.email == user.email);
       notifyListeners();
     }
   }

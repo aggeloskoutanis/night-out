@@ -9,28 +9,36 @@ import 'package:intl/intl.dart';
 
 import '../provider/models/user.dart';
 
-// Dummy data to add as pictures
-
 final List<String> imgList = [];
 
-class EventCard extends StatelessWidget {
+class EventCard extends StatefulWidget {
   final String? eventName;
   final String? eventDate;
   final List<dynamic>? pictures;
   final List<dynamic>? invitedUsers;
   final String? eventLocation;
+  final String id;
 
-  const EventCard({required this.eventName, required this.eventDate, required this.eventLocation, required this.pictures, required this.invitedUsers, Key? key}) : super(key: key);
+  const EventCard({required this.id, required this.eventName, required this.eventDate, required this.eventLocation, required this.pictures, required this.invitedUsers, Key? key}) : super(key: key);
+
+  @override
+  State<EventCard> createState() => _EventCardState();
+}
+
+class _EventCardState extends State<EventCard> {
+  void _refreshPage() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     final DateFormat formatter = DateFormat('dd-MM-yyyy');
-    final List<Widget> imageSliders = imgList
+    final List<Widget> imageSliders = widget.pictures!
         .map(
           (item) => Card(
             semanticContainer: true,
             clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: Image.network(item, fit: BoxFit.fill),
+            child: SizedBox(width: MediaQuery.of(context).size.width - 30, child: Image.network(item, fit: BoxFit.cover)),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4.0),
             ),
@@ -42,14 +50,17 @@ class EventCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, '/event-screen',
-            arguments: EventCard(
-              eventName: eventName,
-              eventDate: eventDate,
-              eventLocation: eventLocation,
-              pictures: pictures,
-              invitedUsers: invitedUsers,
-            ));
+        Navigator.pushNamed(context, '/event-screen', arguments: [
+          _refreshPage,
+          EventCard(
+            id: widget.id,
+            eventName: widget.eventName,
+            eventDate: widget.eventDate,
+            eventLocation: widget.eventLocation,
+            pictures: widget.pictures,
+            invitedUsers: widget.invitedUsers,
+          )
+        ]);
       },
       child: Slidable(
           key: UniqueKey(),
@@ -79,7 +90,7 @@ class EventCard extends StatelessWidget {
                           ),
                           Flexible(
                             child: Text(
-                              '$eventName',
+                              '${widget.eventName}',
                               style: const TextStyle(color: Colors.white),
                             ),
                           ),
@@ -97,7 +108,7 @@ class EventCard extends StatelessWidget {
                         const SizedBox(
                           width: 20,
                         ),
-                        Flexible(child: Text(formatter.format(DateTime.parse(eventDate!)), style: const TextStyle(color: Colors.white)))
+                        Flexible(child: Text(formatter.format(DateTime.parse(widget.eventDate!)), style: const TextStyle(color: Colors.white)))
                       ]),
                     ),
                     Padding(
@@ -111,7 +122,7 @@ class EventCard extends StatelessWidget {
                         const SizedBox(
                           width: 20,
                         ),
-                        Flexible(child: Text('$eventLocation', style: const TextStyle(color: Colors.white)))
+                        Flexible(child: Text('${widget.eventLocation}', style: const TextStyle(color: Colors.white)))
                       ]),
                     ),
                     GestureDetector(
@@ -126,7 +137,7 @@ class EventCard extends StatelessWidget {
                             position: BadgePosition.topEnd(top: -5, end: -3),
                             animationType: BadgeAnimationType.slide,
                             badgeContent: Text(
-                              invitedUsers?.length.toString() as String,
+                              widget.invitedUsers?.length.toString() as String,
                               style: const TextStyle(color: Colors.white, fontSize: 12),
                             ),
                             child: const Icon(
@@ -168,6 +179,7 @@ class EventCard extends StatelessWidget {
                 color: Colors.blueGrey,
                 child: SizedBox(
                   height: 200,
+                  width: MediaQuery.of(context).size.width - 30,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -205,7 +217,7 @@ class EventCard extends StatelessWidget {
               } else {
                 final users = snapshot.data?.docs;
 
-                _invitedUserDetails.addAll(_getInvitedUsers(invitedUsers, users!));
+                _invitedUserDetails.addAll(_getInvitedUsers(widget.invitedUsers, users!));
 
                 return AlertDialog(
                   title: const Text('Invited Users'),

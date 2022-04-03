@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_login/widgets/pictures_gallery.dart';
 
 import '../widgets/event_card.dart';
+import '../widgets/pictures_gallery.dart';
 
 class EventScreen extends StatelessWidget {
   final EventCard event;
 
-  const EventScreen({required this.event, Key? key}) : super(key: key);
+  final Function callback;
+
+  const EventScreen({required this.event, required this.callback, Key? key}) : super(key: key);
 
   static const routeName = '/event-screen';
 
@@ -19,7 +21,7 @@ class EventScreen extends StatelessWidget {
       ),
       body: Container(
         alignment: Alignment.topCenter,
-        child: PictureGallery(pictures: event.pictures!),
+        child: PictureGallery(event: event, callback: callback),
         decoration: BoxDecoration(
           gradient: LinearGradient(
               colors: [
