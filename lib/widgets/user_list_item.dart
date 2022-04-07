@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../provider/models/user.dart';
@@ -53,7 +54,13 @@ class UserListItems extends StatelessWidget {
               ),
             ),
             child: CircleAvatar(
-              backgroundImage: Image.network(user.profilePic).image,
+              child: CachedNetworkImage(
+                imageUrl: user.profilePic,
+                progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              ),
+              backgroundImage: null,
+              // Image.network(user.profilePic).image,
             ),
           ),
           title: Text(
