@@ -3,12 +3,39 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_login/widgets/event_card.dart';
 
-class EventsOverviewScreen extends StatelessWidget {
+class EventsOverviewScreen extends StatefulWidget {
   const EventsOverviewScreen({Key? key}) : super(key: key);
 
   @override
+  State<EventsOverviewScreen> createState() => _EventsOverviewScreenState();
+}
+
+class _EventsOverviewScreenState extends State<EventsOverviewScreen> {
+  @override
   Widget build(BuildContext context) {
     List<EventCard> events = [];
+
+    List<EventCard> _eventList(snapshot) {
+      final fetchedData = snapshot.data?.docs;
+      fetchedData?.forEach((element) {
+        events.add(
+          EventCard(
+            id: element.id,
+            eventName: element['event_name'] as String,
+            eventDate: element['event_date'] as String,
+            eventLocation: element['event_location'] as String,
+            pictures: element['images'] as List<dynamic>,
+            invitedUsers: element['invited_users'] as List<dynamic>,
+            removeEventFromEventsList: (String id) {
+              setState(() {
+                events.removeWhere((element) => element.id == id);
+              });
+            },
+          ),
+        );
+      });
+      return events;
+    }
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -35,24 +62,7 @@ class EventsOverviewScreen extends StatelessWidget {
       body: FutureBuilder<QuerySnapshot>(
           future: FirebaseFirestore.instance.collection('events').get(),
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                  child: CircularProgressIndicator(
-                color: Colors.blueGrey,
-              ));
-            } else {
-              final fetchedData = snapshot.data?.docs;
-              fetchedData?.forEach((element) {
-                events.add(EventCard(
-                    id: element.id,
-                    eventName: element['event_name'] as String,
-                    eventDate: element['event_date'] as String,
-                    eventLocation: element['event_location'] as String,
-                    pictures: element['images'] as List<dynamic>,
-                    invitedUsers: element['invited_users'] as List<dynamic>));
-              });
-
-              return Container(
+            return Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                       colors: [
@@ -63,11 +73,14 @@ class EventsOverviewScreen extends StatelessWidget {
                       end: Alignment.bottomRight,
                       stops: const [0, 1]),
                 ),
-                child: Column(
-                  children: [...events],
-                ),
-              );
-            }
+                child: (snapshot.connectionState == ConnectionState.waiting)
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                        color: Colors.blueGrey,
+                      ))
+                    : Column(
+                        children: [..._eventList(snapshot)],
+                      ));
           }),
     );
   }

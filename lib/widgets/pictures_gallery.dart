@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_login/widgets/add_picture.dart';
+import 'package:flutter_firebase_login/widgets/picture_details.dart';
 
 import 'event_card.dart';
 
@@ -57,7 +59,24 @@ class _PictureGalleryState extends State<PictureGallery> {
                 child: Card(
                   semanticContainer: true,
                   clipBehavior: Clip.antiAliasWithSaveLayer,
-                  child: _picToShow[index] is String ? Image.network(_picToShow[index], fit: BoxFit.fill) : _picToShow[index],
+                  child: _picToShow[index] is String
+                      ? GestureDetector(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) {
+                              return PictureDetails(image: _picToShow[index] as String, index: index.toString());
+                            }));
+                          },
+                          child: Hero(
+                              tag: 'image_' + index.toString(),
+                              child:
+                                  // Image.network(_picToShow[index], fit: BoxFit.fill
+                                  CachedNetworkImage(
+                                imageUrl: _picToShow[index],
+                                fit: BoxFit.fill,
+                                progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+                                errorWidget: (context, url, error) => Icon(Icons.error),
+                              )))
+                      : _picToShow[index],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4.0),
                   ),
