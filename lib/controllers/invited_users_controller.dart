@@ -16,7 +16,7 @@ class InviteUsersController extends GetxController {
   }
 
   void removeUserFromList(UserDetails removeUser) {
-    _invitedUsers.remove(InvitedUserItem(user: removeUser));
+    _invitedUsers.removeWhere((element) => element.user.id == removeUser.id);
     update();
   }
 
@@ -26,7 +26,7 @@ class InviteUsersController extends GetxController {
   }
 
   void removeSearchList(UserDetails removeUser) {
-    _searchList.remove(InvitedUserItem(user: removeUser));
+    _searchList.remove(InvitedUserItem(user: removeUser, isInvited: true));
     update();
   }
 

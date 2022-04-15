@@ -77,7 +77,7 @@ class _UserListState extends State<UserList> {
                       List<InvitedUserItem> alreadyInvitedUsers = [];
                       if (invitedUserController.invitedUsers.isNotEmpty) {
                         for (var alreadyInv in invitedUserController.invitedUsers) {
-                          InvitedUserItem user = InvitedUserItem(user: usersController.findUserById(alreadyInv.user.id), isInvited: true);
+                          InvitedUserItem user = InvitedUserItem(user: usersController.findUserById(alreadyInv.user.id), isInvited: alreadyInv.isInvited);
                           alreadyInvitedUsers.add(user);
                         }
 
