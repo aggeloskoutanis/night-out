@@ -1,7 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_login/controllers/event_controller.dart';
+import 'package:flutter_firebase_login/screens/event_creation_screen.dart';
 import 'package:flutter_firebase_login/widgets/event_card.dart';
+import 'package:get/get.dart';
+
+import '../provider/models/event.dart';
 
 class EventsOverviewScreen extends StatefulWidget {
   const EventsOverviewScreen({Key? key}) : super(key: key);
@@ -13,29 +17,10 @@ class EventsOverviewScreen extends StatefulWidget {
 class _EventsOverviewScreenState extends State<EventsOverviewScreen> {
   @override
   Widget build(BuildContext context) {
-    List<EventCard> events = [];
+    // Provider.of<Events>(context).setEvents(widget.events);
 
-    List<EventCard> _eventList(snapshot) {
-      final fetchedData = snapshot.data?.docs;
-      fetchedData?.forEach((element) {
-        events.add(
-          EventCard(
-            id: element.id,
-            eventName: element['event_name'] as String,
-            eventDate: element['event_date'] as String,
-            eventLocation: element['event_location'] as String,
-            pictures: element['images'] as List<dynamic>,
-            invitedUsers: element['invited_users'] as List<dynamic>,
-            removeEventFromEventsList: (String id) {
-              setState(() {
-                events.removeWhere((element) => element.id == id);
-              });
-            },
-          ),
-        );
-      });
-      return events;
-    }
+    final EventController eventController = Get.put(EventController());
+    // eventController.removeUnsavedEvents();
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -43,8 +28,13 @@ class _EventsOverviewScreenState extends State<EventsOverviewScreen> {
           child: const Icon(
             Icons.add,
           ),
-          onPressed: () async {
-            Navigator.of(context).pushNamed('/event-creation');
+          onPressed: () {
+            // Navigator.of(context).pushNamed('/event-creation');
+            // EventController eventController = Get.put(EventController());
+            Event newEvent = Event.defaultConstructor();
+            // eventController.addEvent(newEvent);
+
+            Get.to(() => EventCreationScreen(event: newEvent));
           }),
       appBar: AppBar(
         actions: [
@@ -59,10 +49,11 @@ class _EventsOverviewScreenState extends State<EventsOverviewScreen> {
         backgroundColor: Colors.black87,
         title: const Text('Recent events', style: TextStyle(fontFamily: 'Quicksand', fontWeight: FontWeight.w700)),
       ),
-      body: FutureBuilder<QuerySnapshot>(
-          future: FirebaseFirestore.instance.collection('events').get(),
-          builder: (context, snapshot) {
+      body: GetBuilder(
+          init: eventController,
+          builder: (ctx) {
             return Container(
+                height: MediaQuery.of(context).size.height,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                       colors: [
@@ -73,14 +64,11 @@ class _EventsOverviewScreenState extends State<EventsOverviewScreen> {
                       end: Alignment.bottomRight,
                       stops: const [0, 1]),
                 ),
-                child: (snapshot.connectionState == ConnectionState.waiting)
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                        color: Colors.blueGrey,
-                      ))
-                    : Column(
-                        children: [..._eventList(snapshot)],
-                      ));
+                child: ListView.builder(
+                  itemCount: eventController.events.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) => EventCard(event: eventController.events[index]),
+                ));
           }),
     );
   }

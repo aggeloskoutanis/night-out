@@ -1,19 +1,21 @@
 import 'package:awesome_icons/awesome_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_login/provider/models/event.dart';
 import 'package:flutter_geocoder/geocoder.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
-import '../forms/event_creation_form.dart';
+import '../provider/events.dart';
 import '../provider/models/invited_user.dart';
 import 'address_item.dart';
 
 class SearchableMap extends StatefulWidget {
-  final EventDetails eventDetails;
+  String newEventName;
+  String newEventDate;
 
-  const SearchableMap({required this.eventDetails, Key? key}) : super(key: key);
+  SearchableMap({required this.newEventDate, required this.newEventName, Key? key}) : super(key: key);
 
   @override
   _SearchableMapState createState() => _SearchableMapState();
@@ -68,24 +70,24 @@ class _SearchableMapState extends State<SearchableMap> {
             child: FloatingActionButton.extended(
               heroTag: "submitEvent",
               onPressed: () async {
-                if (widget.eventDetails.eventName.isEmpty) {
+                if (widget.newEventName.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid event name')));
                   return;
                 }
 
-                final invitedUsers = Provider.of<InvitedUser>(context, listen: false).invitedUsers;
+                // final invitedUsers = Provider.of<InvitedUser>(context, listen: false).invitedUsers;
 
-                if (invitedUsers.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invite people!')));
-                  return;
-                }
+                // if (invitedUsers.isEmpty) {
+                //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invite people!')));
+                //   return;
+                // }
 
-                if (widget.eventDetails.eventDate.year < DateTime.now().year) {
+                if (DateTime.parse(widget.newEventDate).year < DateTime.now().year) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please pick a date for the event to take place')));
                   return;
                 }
 
-                registerEvent(widget.eventDetails, invitedUsers, latlng.value);
+                // registerEvent(widget.newEventName, widget.newEventDate, invitedUsers, latlng.value, userId!);
 
                 Navigator.pop(context);
               },
@@ -99,20 +101,23 @@ class _SearchableMapState extends State<SearchableMap> {
     );
   }
 
-  void registerEvent(EventDetails eventDetails, Map<String, InvitedUserItem> invitedUsers, LatLng latlng) async {
-    await FirebaseFirestore.instance.collection('events').add({
+  void registerEvent(String name, String date, Map<String, InvitedUserItem> invitedUsers, LatLng latlng, String loggedInUser) {
+    FirebaseFirestore.instance.collection('events').add({
       'event_location': latlng.latitude.toString() + ', ' + latlng.longitude.toString(),
-      'event_name': eventDetails.eventName,
-      'event_date': eventDetails.eventDate.toIso8601String(),
+      'event_address': addressToSearch.value,
+      'event_name': name,
+      'event_date': date,
+      'event_creator': loggedInUser,
       'images': [],
       'invited_users': FieldValue.arrayUnion(invitedUsers.values
           .map(
             (value) => value.user.id,
           )
           .toList())
+    }).then((docRef) {
+      Provider.of<Events>(context, listen: false).addEvent(Event(docRef.id, date, [], [], name, latlng.latitude.toString() + ', ' + latlng.longitude.toString(), addressToSearch.value, loggedInUser));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Event created successfully!')));
     });
-
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Event created successfully!')));
   }
 }
 

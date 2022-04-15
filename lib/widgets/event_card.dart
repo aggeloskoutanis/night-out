@@ -2,52 +2,37 @@ import 'package:awesome_icons/awesome_icons.dart';
 import 'package:badges/badges.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:collection/collection.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_login/screens/event_screen.dart';
 import 'package:flutter_firebase_login/widgets/user_list_item.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:intl/intl.dart';
 
+import '../controllers/event_controller.dart';
+import '../provider/models/event.dart';
 import '../provider/models/user.dart';
 
 final List<String> imgList = [];
 
 class EventCard extends StatefulWidget {
-  final String? eventName;
-  final String? eventDate;
-  final List<dynamic>? pictures;
-  final List<dynamic>? invitedUsers;
-  final String? eventLocation;
-  final String id;
-  final Function removeEventFromEventsList;
+  final Event event;
 
-  const EventCard(
-      {required this.id,
-      required this.eventName,
-      required this.eventDate,
-      required this.eventLocation,
-      required this.pictures,
-      required this.invitedUsers,
-      required this.removeEventFromEventsList,
-      Key? key})
-      : super(key: key);
+  const EventCard({required this.event, Key? key}) : super(key: key);
 
   @override
   State<EventCard> createState() => _EventCardState();
 }
 
 class _EventCardState extends State<EventCard> {
-  void _refreshPage() {
-    setState(() {});
-  }
-
   bool _deleteFlag = false;
   @override
   Widget build(BuildContext context) {
     final DateFormat formatter = DateFormat('dd-MM-yyyy');
-    final List<Widget> imageSliders = widget.pictures!
-        .map(
+    final List<Card>? imageSliders = widget.event.pictures
+        ?.map(
           (item) => Card(
             semanticContainer: true,
             clipBehavior: Clip.antiAliasWithSaveLayer,
@@ -57,9 +42,9 @@ class _EventCardState extends State<EventCard> {
                     // Image.network(item, fit: BoxFit.cover)
                     CachedNetworkImage(
                   fit: BoxFit.cover,
-                  imageUrl: item,
+                  imageUrl: item.getImgURL,
                   progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
                 )),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4.0),
@@ -72,18 +57,8 @@ class _EventCardState extends State<EventCard> {
 
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, '/event-screen', arguments: [
-          _refreshPage,
-          EventCard(
-            id: widget.id,
-            eventName: widget.eventName,
-            eventDate: widget.eventDate,
-            eventLocation: widget.eventLocation,
-            pictures: widget.pictures,
-            invitedUsers: widget.invitedUsers,
-            removeEventFromEventsList: (_) {},
-          )
-        ]);
+        // Navigator.pushNamed(context, '/event-screen', arguments: [widget]);
+        Get.to(() => EventScreen(event: widget.event));
       },
       child: Slidable(
           key: UniqueKey(),
@@ -113,7 +88,7 @@ class _EventCardState extends State<EventCard> {
                           ),
                           Flexible(
                             child: Text(
-                              '${widget.eventName}',
+                              widget.event.eventName,
                               style: const TextStyle(color: Colors.white),
                             ),
                           ),
@@ -131,7 +106,7 @@ class _EventCardState extends State<EventCard> {
                         const SizedBox(
                           width: 20,
                         ),
-                        Flexible(child: Text(formatter.format(DateTime.parse(widget.eventDate!)), style: const TextStyle(color: Colors.white)))
+                        Flexible(child: Text(formatter.format(DateTime.parse(widget.event.eventDate)), style: const TextStyle(color: Colors.white)))
                       ]),
                     ),
                     Padding(
@@ -145,7 +120,7 @@ class _EventCardState extends State<EventCard> {
                         const SizedBox(
                           width: 20,
                         ),
-                        Flexible(child: Text('${widget.eventLocation}', style: const TextStyle(color: Colors.white)))
+                        Text(widget.event.eventLocation ?? "No location picked", style: const TextStyle(color: Colors.white))
                       ]),
                     ),
                     GestureDetector(
@@ -160,7 +135,7 @@ class _EventCardState extends State<EventCard> {
                             position: BadgePosition.topEnd(top: -5, end: -3),
                             animationType: BadgeAnimationType.slide,
                             badgeContent: Text(
-                              widget.invitedUsers?.length.toString() as String,
+                              widget.event.invitedUsers?.length.toString() as String,
                               style: const TextStyle(color: Colors.white, fontSize: 12),
                             ),
                             child: const Icon(
@@ -181,7 +156,7 @@ class _EventCardState extends State<EventCard> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: GestureDetector(
-                        onTap: () => deleteEvent(widget.id, widget.pictures),
+                        onTap: () => deleteEvent(widget.event.id!, widget.event.pictures),
                         child: _deleteFlag
                             ? const CircularProgressIndicator()
                             : Container(
@@ -227,7 +202,7 @@ class _EventCardState extends State<EventCard> {
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
-                            children: [...imageSliders],
+                            children: [...imageSliders!],
                           ),
                         ),
                       ),
@@ -256,7 +231,7 @@ class _EventCardState extends State<EventCard> {
               } else {
                 final users = snapshot.data?.docs;
 
-                _invitedUserDetails.addAll(_getInvitedUsers(widget.invitedUsers, users!));
+                _invitedUserDetails.addAll(_getInvitedUsers(widget.event.invitedUsers, users!));
 
                 return AlertDialog(
                   title: const Text('Invited Users'),
@@ -297,18 +272,13 @@ class _EventCardState extends State<EventCard> {
   }
 
   void deleteEvent(String eventId, List<dynamic>? pictures) async {
-    setState(() {
-      _deleteFlag = true;
-    });
     FirebaseFirestore.instance.doc('events/$eventId').delete().then((value) async => {
           for (var i = 0; i < pictures!.length; i++) {await FirebaseStorage.instance.ref().child(pictures[i]).delete()}
         });
 
-    setState(() {
-      _deleteFlag = false;
-    });
-
-    widget.removeEventFromEventsList(eventId);
+    final eventController = Get.put(EventController());
+    eventController.removeEventById(eventId);
+    // Provider.of<Events>(context).removeEvent(eventId);
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Event successfully deleted')));
   }
 }

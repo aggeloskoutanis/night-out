@@ -5,12 +5,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../controllers/event_controller.dart';
+import '../provider/models/picture.dart';
+
 class AddPicture extends StatefulWidget {
-  final Function callback;
   final eventId;
-  const AddPicture({required this.eventId, required this.callback, Key? key}) : super(key: key);
+  const AddPicture({required this.eventId, Key? key}) : super(key: key);
 
   @override
   State<AddPicture> createState() => _AddPictureState();
@@ -31,22 +35,30 @@ class _AddPictureState extends State<AddPicture> {
 
   @override
   Widget build(BuildContext context) {
+    final eventController = Get.put(EventController());
+
     return GestureDetector(
       onTap: () async {
         _pickImage().then((uploadedPic) {
           _isLoading.value = true;
           _uploadProfilePicToFb(_auth?.currentUser?.uid, uploadedPic!, _fbstorage!).then((picPathInFirestore) async {
-            if (picPathInFirestore == null) {
+            final CollectionReference picsRef = FirebaseFirestore.instance.collection('pictures');
+
+            await picsRef.add({'pic_url': picPathInFirestore, 'upload_date': DateTime.now().toIso8601String(), 'uploader_uuid': _auth?.currentUser?.uid}).then((docRef) {
+              Picture newPic = Picture(id: docRef.id, imgURL: picPathInFirestore!, uploader: _auth?.currentUser?.uid);
+
+              eventController.addPictureToEvent(widget.eventId, newPic);
+              // Provider.of<Events>(context).addPictureToEvent(widget.eventId, newPic);
+
+              FirebaseFirestore.instance.doc('events/${widget.eventId}').update({
+                'images': FieldValue.arrayUnion([newPic.toJson()])
+              });
+              _isLoading.value = false;
+            }).onError((error, stackTrace) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Failed to upload image.Please try again.')),
               );
-            } else {
-              widget.callback(picPathInFirestore);
-              await FirebaseFirestore.instance.doc('events/${widget.eventId}').update({
-                'images': FieldValue.arrayUnion([picPathInFirestore])
-              });
-              _isLoading.value = false;
-            }
+            });
           });
         });
       },
@@ -93,6 +105,7 @@ class _AddPictureState extends State<AddPicture> {
     String uid = userUid!;
 
     Reference ref = fireStorage.ref().child("images").child(uid + DateTime.now().toIso8601String() + '.jpg');
+
     await ref.putFile(file);
 
     return ref.getDownloadURL();

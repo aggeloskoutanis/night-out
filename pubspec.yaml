@@ -18,10 +18,10 @@ dependencies:
     sdk: flutter
 
   http: any
-  provider: any
   flutter_native_splash: ^2.0.2
   flutter_map: ^0.14.0
   latlong2: ^0.8.0
+  provider: any
   flutter_geocoder: ^0.2.2-nullsafety
   flutter_slidable: ^1.2.0
   image_picker: ^0.8.4+7
@@ -31,6 +31,8 @@ dependencies:
   animations: ^2.0.2
   flutter_rounded_date_picker: ^2.0.2
   cached_network_image: ^3.2.0
+  get: ^4.6.1
+  get_storage: ^2.0.3
 
 dev_dependencies:
   flutter_test:
