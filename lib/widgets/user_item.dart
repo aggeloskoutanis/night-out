@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -56,13 +57,19 @@ class UserTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        child: picture == null
-            ? Image.asset(
-                'assets/pic_placeholder.png',
-                fit: BoxFit.contain,
-              )
-            : null,
-        backgroundImage: (picture != null) ? Image.network(picture!).image : null,
+        child: ClipOval(
+          child: SizedBox.fromSize(
+            size: const Size.fromRadius(48),
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              imageUrl: picture!,
+              progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+            ),
+          ),
+        ),
+        backgroundImage: null,
+        // Image.network(user.profilePic).image,
       ),
       title: Text(username!, style: const TextStyle(fontFamily: 'Lato', fontStyle: FontStyle.normal, fontWeight: FontWeight.w400)),
     );

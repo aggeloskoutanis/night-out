@@ -1,14 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_login/controllers/event_data_controller.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 import './../provider/models/user.dart';
+import '../controllers/invited_users_controller.dart';
 import '../provider/models/event.dart';
 import '../widgets/searchable_map.dart';
 import '../widgets/user_list.dart';
+import '../widgets/user_list_item.dart';
 
 class EventCreationForm extends StatefulWidget {
   final Event event;
+
   const EventCreationForm({required this.event, Key? key}) : super(key: key);
 
   @override
@@ -19,8 +25,8 @@ class _EventCreationFormState extends State<EventCreationForm> {
   final _formKey = GlobalKey<FormState>();
 
   List<UserDetails>? userEmails = [];
-
   final TextEditingController _controller = TextEditingController();
+  final EventDataController eventDataController = Get.put(EventDataController());
 
   @override
   void initState() {
@@ -59,8 +65,10 @@ class _EventCreationFormState extends State<EventCreationForm> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   TextFormField(
+                    controller: _controller,
                     onChanged: (value) {
                       widget.event.eventName = value;
+                      eventDataController.eventName.value = value;
                     },
                     style: const TextStyle(color: Colors.white70),
                     keyboardType: TextInputType.emailAddress,
@@ -69,7 +77,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                           Icons.drive_file_rename_outline,
                           color: Colors.white70,
                         ),
-                        hintText: "Enter an event name",
+                        hintText: "Enter an ",
                         hintStyle: const TextStyle(color: Colors.white70),
                         // errorText: "Invalid input",
                         label: const Text(
@@ -123,6 +131,8 @@ class _EventCreationFormState extends State<EventCreationForm> {
                               // newEvent.invitedUsers = <String>[];
                               // newEvent.pictures = <Picture>[];
                               // eventController.addEvent(widget.event);
+                              final InviteUsersController inviteUsersController = Get.put(InviteUsersController());
+                              inviteUsersController.clearSearchList();
                               FocusManager.instance.primaryFocus?.unfocus();
                               showModalBottomSheet(
                                   isScrollControlled: true,
@@ -143,7 +153,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                           height: 50,
                           margin: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                              shape: BoxShape.rectangle, color: Colors.white.withOpacity(.1), border: Border.all(color: Colors.blueGrey), borderRadius: BorderRadius.all(Radius.circular(8))),
+                              shape: BoxShape.rectangle, color: Colors.white.withOpacity(.1), border: Border.all(color: Colors.blueGrey), borderRadius: const BorderRadius.all(Radius.circular(8))),
                           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: const [
                             Icon(
                               Icons.date_range,
@@ -161,7 +171,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
 
                           widget.event.eventDate = (await showDatePicker(
                                       context: context,
-                                      initialDate: now,
+                                      initialDate: eventDataController.eventDate.value.isNotEmpty ? DateTime.parse(eventDataController.eventDate.value) : now,
                                       firstDate: DateTime(now.year, now.month, now.day),
                                       lastDate: DateTime(now.year + 2),
                                       builder: (context, child) {
@@ -185,6 +195,7 @@ class _EventCreationFormState extends State<EventCreationForm> {
                                       }) ??
                                   DateTime(2017))
                               .toIso8601String();
+                          eventDataController.eventDate.value = widget.event.eventDate;
                         },
                       )),
                       Expanded(
@@ -211,6 +222,8 @@ class _EventCreationFormState extends State<EventCreationForm> {
                         onTap: () {
                           FocusManager.instance.primaryFocus?.unfocus();
                           // GetBuilder
+                          final InviteUsersController inviteUsersController = Get.put(InviteUsersController());
+
                           showModalBottomSheet(
                               isScrollControlled: true,
                               backgroundColor: Colors.black87,
@@ -219,20 +232,24 @@ class _EventCreationFormState extends State<EventCreationForm> {
                               context: context,
                               builder: (ctx) {
                                 // return SingleChildScrollView(
-                                return Container();
-                                //     padding: const EdgeInsets.all(8.0),
-                                //     height: MediaQuery.of(context).size.height - (MediaQuery.of(context).size.height * 0.26),
-                                //     child: ListView.builder(
-                                //       itemCount: invitedUsers.invitedUsers.length,
-                                //       shrinkWrap: true,
-                                //       itemBuilder: (BuildContext context, int index) {
-                                //         UserDetails user = invitedUsers.invitedUsers.values.toList().elementAt(index).user;
-                                //         return UserListItems(
-                                //           user: user,
-                                //         );
-                                //       },
-                                //     ),
-                                //   ),
+                                return GetBuilder(
+                                  init: inviteUsersController,
+                                  builder: (invitedUserController) => Container(
+                                    padding: const EdgeInsets.all(8.0),
+                                    height: MediaQuery.of(context).size.height - (MediaQuery.of(context).size.height * 0.26),
+                                    child: ListView.builder(
+                                      itemCount: inviteUsersController.invitedUsers.length,
+                                      shrinkWrap: true,
+                                      itemBuilder: (BuildContext context, int index) {
+                                        UserDetails user = inviteUsersController.invitedUsers.toList().elementAt(index).user;
+                                        return UserListItems(
+                                          user: user,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                );
+
                                 // );
                               });
                         },
@@ -240,10 +257,10 @@ class _EventCreationFormState extends State<EventCreationForm> {
                     ],
                   ),
                   Expanded(
-                    child: SearchableMap(
-                      newEventDate: widget.event.eventDate,
-                      newEventName: widget.event.eventName,
-                    ),
+                    child: Obx(() => SearchableMap(
+                          newEventDate: eventDataController.eventDate.value,
+                          newEventName: eventDataController.eventName.value,
+                        )),
                   ),
                 ],
               ),

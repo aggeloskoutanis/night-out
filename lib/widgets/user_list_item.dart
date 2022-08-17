@@ -54,10 +54,16 @@ class UserListItems extends StatelessWidget {
               ),
             ),
             child: CircleAvatar(
-              child: CachedNetworkImage(
-                imageUrl: user.profilePic,
-                progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
-                errorWidget: (context, url, error) => Icon(Icons.error),
+              child: ClipOval(
+                child: SizedBox.fromSize(
+                  size: const Size.fromRadius(48),
+                  child: CachedNetworkImage(
+                    fit: BoxFit.cover,
+                    imageUrl: user.profilePic,
+                    progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                  ),
+                ),
               ),
               backgroundImage: null,
               // Image.network(user.profilePic).image,

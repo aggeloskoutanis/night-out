@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../provider/auth.dart';
 import '../widgets/profile_pic_picker.dart';
 
 enum AuthMode { signup, login }
@@ -37,8 +39,7 @@ class _AuthFormState extends State<AuthForm> {
 
   final _passwordController = TextEditingController();
 
-  Future<String?> _uploadProfilePicToFb(
-      UserCredential authResult, File file) async {
+  Future<String?> _uploadProfilePicToFb(UserCredential authResult, File file) async {
     String uid = authResult.user?.uid ?? username!;
 
     Reference ref = _fbstorage.ref().child("images").child(uid + '.jpg');
@@ -94,30 +95,26 @@ class _AuthFormState extends State<AuthForm> {
       try {
         if (_authMode == AuthMode.login) {
           // log user in
-          await _auth.signInWithEmailAndPassword(
-              email: email!, password: password!);
+          await _auth.signInWithEmailAndPassword(email: email!, password: password!);
         } else {
           // Sign user up
 
-          final UserCredential _authResult =
-              await _auth.createUserWithEmailAndPassword(
-                  email: email!, password: password!);
+          final UserCredential _authResult = await _auth.createUserWithEmailAndPassword(email: email!, password: password!);
 
-          await _uploadProfilePicToFb(_authResult, _userImageFile!)
-              .then((imgURL) {
+          await _uploadProfilePicToFb(_authResult, _userImageFile!).then((imgURL) {
             if (imgURL == null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Failed to upload image.Please try again.')),
+                const SnackBar(content: Text('Failed to upload image.Please try again.')),
               );
             } else {
               imageURL = imgURL;
             }
           });
 
-          await FirebaseFirestore.instance.collection('users').add(
-              {'user_name': username, 'email': email, 'prof_pic': imageURL});
+          await FirebaseFirestore.instance.collection('users').add({'user_name': username, 'email': email, 'prof_pic': imageURL});
         }
+
+        Provider.of<Auth>(context, listen: false).login(email, password);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Processing Data')),
@@ -196,8 +193,7 @@ class _AuthFormState extends State<AuthForm> {
                           color: Colors.blueGrey,
                         ),
                         borderRadius: BorderRadius.circular(8.0)),
-                    focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.teal, width: 2))),
+                    focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.teal, width: 2))),
                 // The validator receives the text that the user has entered.
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -237,8 +233,7 @@ class _AuthFormState extends State<AuthForm> {
                         color: Colors.blueGrey,
                       ),
                       borderRadius: BorderRadius.circular(8.0)),
-                  focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.teal, width: 2))),
+                  focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.teal, width: 2))),
               // The validator receives the text that the user has entered.
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -271,10 +266,7 @@ class _AuthFormState extends State<AuthForm> {
                         color: Colors.blueGrey,
                       ),
                       borderRadius: BorderRadius.circular(8.0)),
-                  focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.teal, width: 2),
-                      borderRadius: BorderRadius.circular(8.0)),
+                  focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.teal, width: 2), borderRadius: BorderRadius.circular(8.0)),
                   border: OutlineInputBorder(
                       borderSide: const BorderSide(
                         color: Colors.blueGrey,
@@ -310,10 +302,7 @@ class _AuthFormState extends State<AuthForm> {
                       "Confirm Password",
                       style: TextStyle(color: Colors.white70),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            const BorderSide(color: Colors.teal, width: 2),
-                        borderRadius: BorderRadius.circular(8.0)),
+                    focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: Colors.teal, width: 2), borderRadius: BorderRadius.circular(8.0)),
                     enabledBorder: OutlineInputBorder(
                         borderSide: const BorderSide(
                           color: Colors.blueGrey,
@@ -341,32 +330,21 @@ class _AuthFormState extends State<AuthForm> {
               height: 40,
             ),
 
-            Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  if (_isLoading)
-                    const CircularProgressIndicator()
-                  else
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          primary: Colors.blueGrey,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 10)),
-                      onPressed: _submit,
-                      child: Text(
-                          _authMode == AuthMode.login ? 'Login' : 'Sign up'),
-                    ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        primary: Colors.blueGrey,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 50, vertical: 10)),
-                    onPressed: _switchMode,
-                    child: Text(
-                        _authMode == AuthMode.login ? 'Sign up' : 'Go back'),
-                  ),
-                ]),
+            Row(crossAxisAlignment: CrossAxisAlignment.center, mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              if (_isLoading)
+                const CircularProgressIndicator()
+              else
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(primary: Colors.blueGrey, padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 10)),
+                  onPressed: _submit,
+                  child: Text(_authMode == AuthMode.login ? 'Login' : 'Sign up'),
+                ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(primary: Colors.blueGrey, padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 10)),
+                onPressed: _switchMode,
+                child: Text(_authMode == AuthMode.login ? 'Sign up' : 'Go back'),
+              ),
+            ]),
           ],
         ),
       ),

@@ -150,23 +150,27 @@ class _UserListItemState extends State<UserListItem> {
         value: widget.foundUser.isInvited,
         controlAffinity: ListTileControlAffinity.trailing,
         secondary: CircleAvatar(
-          child: CachedNetworkImage(
-            imageUrl: (widget.foundUser.user.profilePic),
-            fit: BoxFit.fill,
-            progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
-            errorWidget: (context, url, error) => const Icon(Icons.error),
+          child: ClipOval(
+            child: SizedBox.fromSize(
+              size: const Size.fromRadius(48),
+              child: CachedNetworkImage(
+                fit: BoxFit.cover,
+                imageUrl: widget.foundUser.user.profilePic,
+                progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              ),
+            ),
           ),
+          backgroundImage: null,
+          // Image.network(user.profilePic).image,
         ),
         onChanged: (bool? value) {
           setState(() {
             widget.foundUser.isInvited = !widget.foundUser.isInvited;
 
             if (widget.foundUser.isInvited) {
-              // invitedUsers.addUserToList(foundUser.user);
               widget.invitedUserController.insertUserInList(widget.foundUser.user);
             } else {
-              // invitedUsers.removeUserFromList(foundUser.user);
-              // eventController.removeInvitedUserFromEvent(widget.newEvent, widget.foundUser.user);
               widget.invitedUserController.removeUserFromList(widget.foundUser.user);
             }
           });

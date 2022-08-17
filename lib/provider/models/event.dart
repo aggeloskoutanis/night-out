@@ -33,6 +33,10 @@ class Event {
     _eventCreator = eventCreator;
   }
 
+  void setInvitedUsers(List<String>? invitedUsers) {
+    _invitedUsers = invitedUsers!;
+  }
+
   String? get id => _id;
 
   List<Picture>? get pictures => _pictures;

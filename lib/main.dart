@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_login/screens/auth_screen.dart';
 import 'package:flutter_firebase_login/screens/events_overview.dart';
+import 'package:get/get.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:provider/provider.dart';
 
@@ -43,10 +45,25 @@ class MyApp extends StatelessWidget {
                 stream: FirebaseAuth.instance.authStateChanges(),
                 builder: (ctx, userSnapshot) {
                   if (userSnapshot.hasData) {
-                    return const EventsOverviewScreen();
-                  } else {
-                    return const AuthScreen();
+                    User? user = FirebaseAuth.instance.currentUser;
+
+                    final CollectionReference usersRef = FirebaseFirestore.instance.collection('users');
+
+                    return FutureBuilder<DocumentSnapshot>(
+                        future: usersRef.doc(user!.uid).get(),
+                        builder: (_, snapshot) {
+                          if (snapshot.hasError) {
+                            return const AuthScreen();
+                          }
+
+                          if (snapshot.connectionState == ConnectionState.done) {
+                            return const EventsOverviewScreen();
+                          }
+
+                          return const CircularProgressIndicator();
+                        });
                   }
+                  return const AuthScreen();
                 }),
           ),
         ));

@@ -17,7 +17,7 @@ class EventsOverviewScreen extends StatefulWidget {
 class _EventsOverviewScreenState extends State<EventsOverviewScreen> {
   @override
   Widget build(BuildContext context) {
-    // Provider.of<Events>(context).setEvents(widget.events);
+    // Provider.of<Events>(context).setEvents(s);
 
     final EventController eventController = Get.put(EventController());
     // eventController.removeUnsavedEvents();
@@ -31,10 +31,11 @@ class _EventsOverviewScreenState extends State<EventsOverviewScreen> {
           onPressed: () {
             // Navigator.of(context).pushNamed('/event-creation');
             // EventController eventController = Get.put(EventController());
+
             Event newEvent = Event.defaultConstructor();
             // eventController.addEvent(newEvent);
 
-            Get.to(() => EventCreationScreen(event: newEvent));
+            Get.to(() => EventCreationScreen(event: newEvent), duration: const Duration(seconds: 1));
           }),
       appBar: AppBar(
         actions: [

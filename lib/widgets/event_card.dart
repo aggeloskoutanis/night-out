@@ -120,7 +120,7 @@ class _EventCardState extends State<EventCard> {
                         const SizedBox(
                           width: 20,
                         ),
-                        Text(widget.event.eventLocation ?? "No location picked", style: const TextStyle(color: Colors.white))
+                        Text(widget.event.eventAddress ?? "No location picked", style: const TextStyle(color: Colors.white))
                       ]),
                     ),
                     GestureDetector(
